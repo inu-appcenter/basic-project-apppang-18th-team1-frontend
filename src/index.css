@@ -1,0 +1,216 @@
+@import "tailwindcss";
+
+@theme {
+  /* ================================
+     Colors
+  ================================ */
+
+  /* Primary */
+  --color-primary-100: #eaf0ff;
+  --color-primary-200: #346aff;
+  --color-primary-300: #004f9d;
+
+  /* Secondary */
+  --color-secondary-100: #e4f2fc;
+  --color-secondary-200: #16bdd0;
+  --color-secondary-300: #037e93;
+
+  /* Gray */
+  --color-gray-100: #fafafa;
+  --color-gray-200: #cdcdcd;
+  --color-gray-300: #7e7e7e;
+
+  /* Semantic */
+  --color-red-300: #cb1400;
+  --color-green-300: #00891a;
+  --color-yellow-300: #f5b000;
+  --color-black: #212b36;
+
+  /* ================================
+     Typography - Font Size
+  ================================ */
+
+  /* Title */
+  --font-size-title-1: 36px;
+  --font-size-title-2: 32px;
+  --font-size-title-3: 28px;
+  --font-size-title-4: 24px;
+  --font-size-title-5: 20px;
+
+  /* Body */
+  --font-size-body-1: 14px;
+  --font-size-body-2: 20px;
+  --font-size-body-3: 18px;
+  --font-size-body-4: 18px;
+  --font-size-body-5: 16px;
+  --font-size-body-6: 16px;
+  --font-size-body-7: 14px;
+  --font-size-body-8: 14px;
+  --font-size-body-9: 12px;
+  --font-size-body-10: 12px;
+  --font-size-body-11: 10px;
+  --font-size-body-12: 10px;
+
+  /* ================================
+     Typography - Font Weight
+  ================================ */
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* ================================
+     Typography - Line Height
+  ================================ */
+  --line-height-title: 140%;
+  --line-height-body: 150%;
+  --line-height-body-1: 100%;
+
+  /* ================================
+     Typography - Letter Spacing
+  ================================ */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-none: 0em;
+}
+
+/* ================================
+   Typography Utility Classes
+================================ */
+
+/* Title */
+.text-title-1 {
+  font-size: var(--font-size-title-1);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-title-2 {
+  font-size: var(--font-size-title-2);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-title-3 {
+  font-size: var(--font-size-title-3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-title-4 {
+  font-size: var(--font-size-title-4);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-title-5 {
+  font-size: var(--font-size-title-5);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* Body */
+.text-body-1 {
+  font-size: var(--font-size-body-1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-body-1);
+  letter-spacing: var(--letter-spacing-none);
+}
+
+.text-body-2 {
+  font-size: var(--font-size-body-2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-3 {
+  font-size: var(--font-size-body-3);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-4 {
+  font-size: var(--font-size-body-4);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-5 {
+  font-size: var(--font-size-body-5);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-6 {
+  font-size: var(--font-size-body-6);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-7 {
+  font-size: var(--font-size-body-7);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-8 {
+  font-size: var(--font-size-body-8);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-9 {
+  font-size: var(--font-size-body-9);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-10 {
+  font-size: var(--font-size-body-10);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-11 {
+  font-size: var(--font-size-body-11);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-body-12 {
+  font-size: var(--font-size-body-12);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* ================================
+   Base Reset
+================================ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  color: var(--color-black);
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

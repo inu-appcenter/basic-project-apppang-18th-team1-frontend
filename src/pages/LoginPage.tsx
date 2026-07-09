@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RightArrow, Cross, RoundFrameCross, EyeOpen, EyeClose } from '@/components/icons';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -7,14 +8,11 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
   const isActive = email.length > 0 && password.length > 0;
 
   function handlePasswordLimit() {
-    setPasswordFocused(false);
     if (password.length > 0 && password.length < 8) {
       setPasswordError('비밀번호는 8자 이상이어야 합니다.');
     } else {
@@ -25,18 +23,8 @@ function LoginPage() {
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3">
       {/* Header */}
       <header className="flex w-full items-center justify-end py-5">
-        <button type="button" onClick={() => navigate(-1)} className="p-1">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#7E7E7E"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
+        <button type="button" onClick={() => navigate('/')} className="p-1">
+          <Cross size={24} color="#7E7E7E" />
         </button>
       </header>
 
@@ -46,15 +34,11 @@ function LoginPage() {
       </div>
 
       {/* Email Field */}
-      <div
-        className={`flex w-full items-center gap-2 border px-3 py-3 transition-colors ${emailFocused ? 'border-blue-500' : 'border-gray-300'}`}
-      >
+      <div className="flex w-full items-center gap-2 border border-gray-300 px-3 py-3 transition-colors focus-within:border-blue-500">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          onFocus={() => setEmailFocused(true)}
-          onBlur={() => setEmailFocused(false)}
           placeholder="아이디(이메일)"
           className="text-body-1 flex-1 outline-none placeholder:text-gray-300"
         />
@@ -64,24 +48,14 @@ function LoginPage() {
             onClick={() => setEmail('')}
             className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-300"
           >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M2 2l6 6M8 2L2 8" />
-            </svg>
+            <RoundFrameCross size={12} color="white" />
           </button>
         )}
       </div>
 
       {/* Password Field */}
       <div
-        className={`flex w-full items-center gap-2 border px-3 py-3 transition-colors ${passwordError ? 'border-red-500' : passwordFocused ? 'border-blue-500' : 'border-gray-300'}`}
+        className={`flex w-full items-center gap-2 border px-3 py-3 transition-colors ${passwordError ? 'border-red-500' : 'border-gray-300 focus-within:border-blue-500'}`}
       >
         <input
           type={showPassword ? 'text' : 'password'}
@@ -97,34 +71,9 @@ function LoginPage() {
         />
         <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="shrink-0">
           {showPassword ? (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#7E7E7E"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
-              <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
+            <EyeOpen size={20} color="#7E7E7E" />
           ) : (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#7E7E7E"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
+            <EyeClose size={20} color="#7E7E7E" />
           )}
         </button>
       </div>
@@ -148,18 +97,7 @@ function LoginPage() {
           className="text-primary-200 flex items-center gap-1 text-xs font-semibold"
         >
           아이디·비밀번호 찾기
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="#346AFF"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4.5 3L7.5 6l-3 3" />
-          </svg>
+          <RightArrow size={12} color="#346AFF" />
         </button>
       </div>
 
@@ -183,18 +121,7 @@ function LoginPage() {
           className="text-primary-200 flex items-center gap-1 text-xs font-semibold"
         >
           사업자 회원 가입하기
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="#346AFF"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4.5 3L7.5 6l-3 3" />
-          </svg>
+          <RightArrow size={12} color="#346AFF" />
         </button>
       </div>
 
@@ -202,17 +129,7 @@ function LoginPage() {
       {loginError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">
           <button type="button" onClick={() => setLoginError(false)} className="shrink-0">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="#7E7E7E"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M2 2l8 8M10 2L2 10" />
-            </svg>
+            <Cross size={12} color="#7E7E7E" />
           </button>
           <p className="flex-1 text-xs font-semibold">
             아이디 또는 비밀번호가

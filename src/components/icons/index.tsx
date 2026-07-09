@@ -3,3 +3,8 @@ export { default as Cross } from './Cross';
 export { default as RoundFrameCross } from './RoundFrameCross';
 export { default as EyeOpen } from './EyeOpen';
 export { default as EyeClose } from './EyeClose';
+export { default as LeftArrow } from './LeftArrow';
+export { default as Letter } from './Letter';
+export { default as Lock } from './Lock';
+export { default as Person } from './Person';
+export { default as Phone } from './Phone';

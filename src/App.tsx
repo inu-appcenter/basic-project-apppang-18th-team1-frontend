@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthLayout from '@/layouts/AuthLayout';
 import CommonLayout from '@/layouts/CommonLayout';
 import CommonLayoutNoHeader from '@/layouts/CommonLayoutNoHeader';
+import CommonLayoutNoNavigationBar from '@/layouts/CommonLayoutNoNavigationBar';
 import CartPage from '@/pages/CartPage';
 import ChatbotPage from '@/pages/ChatbotPage';
 import LoginPage from '@/pages/LoginPage';
@@ -26,9 +27,12 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route path="/mypage" element={<MyPage />} />
+        </Route>
+
+        <Route element={<CommonLayoutNoNavigationBar />}>
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/mypage" element={<MyPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>

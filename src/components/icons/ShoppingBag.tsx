@@ -15,7 +15,7 @@ function ShoppingBag({ size = 20, color = '#7E7E7E' }: ShoppingBagProps) {
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      class="lucide lucide-shopping-bag-icon lucide-shopping-bag"
+      className="lucide lucide-shopping-bag-icon lucide-shopping-bag"
     >
       <path d="M16 10a4 4 0 0 1-8 0" />
       <path d="M3.103 6.034h17.794" />

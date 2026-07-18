@@ -27,10 +27,10 @@ function RegisterPage() {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
-  const [phoneNumberError, setPhoneNumberError] = useState(false);
-  const [nameError, setNameError] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [registerError, setRegisterError] = useState(false);
 
   const isActive =
@@ -77,7 +77,7 @@ function RegisterPage() {
     else setNameError('');
   }
 
-  function handlePhoneNumberValidation() {
+  function handlePhoneNumberValidation(value: string) {
     const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
     if (!phoneNumber) setPhoneNumberError('휴대폰 번호를 입력해주세요.');
     else if (!phoneRegex.test(phoneNumber))
@@ -247,7 +247,6 @@ function RegisterPage() {
           }}
           onBlur={() => {
             handlePhoneNumberValidation(phoneNumber);
-            console.log(`${formatPhoneNumber(phoneNumber)}`);
           }}
         />
         {phoneNumber && (
@@ -392,7 +391,7 @@ function RegisterPage() {
       <button
         type="button"
         disabled={!isActive}
-        onClick={() => setRegisterError('true')}
+        onClick={() => setRegisterError(true)}
         className={`mt-auto w-full py-3 text-base font-bold text-white ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
       >
         가입하기

@@ -24,7 +24,7 @@ function ProductListPage() {
       {/* Sort Dropdown */}
       <div className="flex w-full justify-end border-b border-gray-200 px-3 py-2">
         <div className="relative text-sm">
-          <button type="dropdown" onClick={() => setIsOpen((prev) => !prev)}>
+          <button type="button" onClick={() => setIsOpen((prev) => !prev)}>
             {selectedSort}
             {isOpen ? '▲' : '▼'}
           </button>

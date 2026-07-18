@@ -15,7 +15,7 @@ function Receipt({ size = 20, color = '#7E7E7E' }: ReceiptProps) {
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      class="lucide lucide-receipt-text-icon lucide-receipt-text"
+      className="lucide lucide-receipt-text-icon lucide-receipt-text"
     >
       <path d="M13 16H8" />
       <path d="M14 8H8" />

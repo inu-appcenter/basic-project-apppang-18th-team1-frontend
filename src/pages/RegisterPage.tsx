@@ -1,18 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import {
-  RightArrow,
-  Cross,
-  RoundFrameCross,
-  LeftArrow,
-  Letter,
-  Lock,
-  EyeOpen,
-  EyeClose,
-  Person,
-  Phone,
-} from '@/components/icons';
-
 function RegisterPage() {
   const navigate = useNavigate();
   const [allAgree, setAllAgree] = useState(false);

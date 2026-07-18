@@ -65,7 +65,7 @@ function RegisterPage() {
   function handlePasswordValidation(value: string) {
     const hasLetter = /[a-zA-Z]/.test(value);
     const hasNumber = /[0-9]/.test(value);
-    if (!value) setPasswordError('비밀번호를 입력해주세요.');
+    if (!value) setPasswordError('비밀번호를 입력해주세요');
     else if (value.length < 8 || !hasLetter || !hasNumber)
       setPasswordError('비밀번호는 8자 이상, 영문+숫자 조합이여야합니다.');
     else setPasswordError('');

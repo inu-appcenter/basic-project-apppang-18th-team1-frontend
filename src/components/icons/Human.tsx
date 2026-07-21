@@ -15,7 +15,7 @@ function Human({ size = 20, color = '#7E7E7E' }: HumanProps) {
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      class="lucide lucide-circle-user-round-icon lucide-circle-user-round"
+      className="lucide lucide-circle-user-round-icon lucide-circle-user-round"
     >
       <path d="M17.925 20.056a6 6 0 0 0-11.851.001" />
       <circle cx="12" cy="11" r="4" />

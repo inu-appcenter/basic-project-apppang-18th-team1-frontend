@@ -38,11 +38,16 @@ function RegisterPage() {
   const [registerError, setRegisterError] = useState('');
 
   const isActive =
-    emailError === '' &&
-    passwordError === '' &&
-    nameError === '' &&
-    nicknameError === '' &&
-    phoneNumberError === '' &&
+    email.trim() !== '' &&
+    password.trim() !== '' &&
+    name.trim() !== '' &&
+    nickname.trim() !== '' &&
+    phoneNumber.trim() !== '' &&
+    !emailError &&
+    !passwordError &&
+    !nameError &&
+    !nicknameError &&
+    !phoneNumberError &&
     agree1 &&
     agree2 &&
     agree3 &&
@@ -125,33 +130,17 @@ function RegisterPage() {
 
       navigate('/login');
     } catch (error: any) {
-      const data = error.response?.data;
-
-      if (!data) {
+      if (!error.response) {
         setRegisterError('서버와 연결할 수 없습니다.');
         return;
       }
 
-      switch (data.field) {
-        case 'email':
-          setEmailError(data.message);
-          break;
-
-        case 'password':
-          setPasswordError(data.message);
-          break;
-
-        case 'name':
-          setNameError(data.message);
-          break;
-
-        case 'phoneNumber':
-          setPhoneNumberError(data.message);
-          break;
-
-        default:
-          setRegisterError(data.message);
+      if (error.response?.status === 409) {
+        setRegisterError(error.response.data.message);
+        return;
       }
+
+      setRegisterError('회원가입에 실패했습니다.');
     }
   };
 
@@ -490,7 +479,7 @@ function RegisterPage() {
           <button type="button" onClick={() => setRegisterError('')} className="shrink-0">
             <Cross size={12} color="#7E7E7E" />
           </button>
-          <p className="flex-1 text-xs font-semibold">이미 존재하는 이메일입니다.</p>
+          <p className="flex-1 text-xs font-semibold">{registerError}</p>
         </div>
       )}
     </div>

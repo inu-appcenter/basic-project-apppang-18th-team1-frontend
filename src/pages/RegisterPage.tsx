@@ -12,6 +12,7 @@ import {
   EyeClose,
   Person,
   Phone,
+  IdCard,
 } from '@/components/icons';
 
 function RegisterPage() {
@@ -33,12 +34,14 @@ function RegisterPage() {
   const [passwordError, setPasswordError] = useState('');
   const [nameError, setNameError] = useState('');
   const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [nicknameError, setNicknameError] = useState('');
   const [registerError, setRegisterError] = useState('');
 
   const isActive =
     emailError === '' &&
     passwordError === '' &&
     nameError === '' &&
+    nicknameError === '' &&
     phoneNumberError === '' &&
     agree1 &&
     agree2 &&
@@ -77,6 +80,12 @@ function RegisterPage() {
     if (!value) setNameError('이름을 입력해주세요.');
     else if (value.length < 2) setNameError('이름은 최소 2자 이상이어야 합니다.');
     else setNameError('');
+  }
+
+  function handleNicknameValidation(value: string) {
+    if (!value) setNicknameError('닉네임을 입력해주세요.');
+    else if (value.length < 2) setNicknameError('닉네임은 최소 2자 이상이어야 합니다.');
+    else setNicknameError('');
   }
 
   function handlePhoneNumberValidation() {
@@ -271,6 +280,40 @@ function RegisterPage() {
         )}
       </div>
       {nameError && <p className="w-full text-xs text-red-500">{nameError}</p>}
+
+      {/* NickName Field */}
+      <div
+        className={`flex h-12 w-full items-center border transition-colors ${
+          nicknameError ? 'border-red-500' : 'border-gray-300 focus-within:border-blue-500'
+        }`}
+      >
+        <div className="flex h-full w-12 shrink-0 items-center justify-center border-r border-gray-300 bg-gray-50">
+          <IdCard size={20} color="#7E7E7E" />
+        </div>
+        <input
+          type="text"
+          placeholder="닉네임"
+          className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
+          value={nickname}
+          onChange={(e) => {
+            setNickname(e.target.value);
+            handleNicknameValidation(e.target.value);
+          }}
+          onBlur={() => {
+            handleNicknameValidation(nickname);
+          }}
+        />
+        {nickname && (
+          <button
+            type="button"
+            onClick={() => setNickname('')}
+            className="mr-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-300"
+          >
+            <RoundFrameCross size={10} color="white" />
+          </button>
+        )}
+      </div>
+      {nicknameError && <p className="w-full text-xs text-red-500">{nicknameError}</p>}
 
       {/* Phone Number Field */}
       <div

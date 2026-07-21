@@ -9,5 +9,5 @@ export interface SignupRequest {
 }
 
 export const signup = (data: SignupRequest) => {
-  return instance.post('/api/auth/signup', data);
+  return instance.post('/auth/signup', data);
 };

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { signup } from '@/api/auth';
 import {
   RightArrow,
   Cross,
@@ -26,12 +27,13 @@ function RegisterPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
-  const [phoneNumberError, setPhoneNumberError] = useState(false);
-  const [nameError, setNameError] = useState(false);
-  const [registerError, setRegisterError] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [registerError, setRegisterError] = useState('');
 
   const isActive =
     emailError === '' &&
@@ -99,6 +101,50 @@ function RegisterPage() {
       setAllAgree(false);
     }
   }, [agree1, agree2, agree3, agree4, agree5, agree6]);
+
+  const handleRegister = async () => {
+    try {
+      const response = await signup({
+        name,
+        email,
+        password,
+        phoneNumber: phoneNumber.replace(/-/g, ''),
+        nickname,
+      });
+
+      alert(response.data.message);
+
+      navigate('/login');
+    } catch (error: any) {
+      const data = error.response?.data;
+
+      if (!data) {
+        setRegisterError('서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      switch (data.field) {
+        case 'email':
+          setEmailError(data.message);
+          break;
+
+        case 'password':
+          setPasswordError(data.message);
+          break;
+
+        case 'name':
+          setNameError(data.message);
+          break;
+
+        case 'phoneNumber':
+          setPhoneNumberError(data.message);
+          break;
+
+        default:
+          setRegisterError(data.message);
+      }
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3 pb-10">
@@ -247,7 +293,6 @@ function RegisterPage() {
           }}
           onBlur={() => {
             handlePhoneNumberValidation(phoneNumber);
-            console.log(`${formatPhoneNumber(phoneNumber)}`);
           }}
         />
         {phoneNumber && (
@@ -392,14 +437,14 @@ function RegisterPage() {
       <button
         type="button"
         disabled={!isActive}
-        onClick={() => setRegisterError('true')}
+        onClick={handleRegister}
         className={`mt-auto w-full py-3 text-base font-bold text-white ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
       >
         가입하기
       </button>
       {registerError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">
-          <button type="button" onClick={() => setRegisterError(false)} className="shrink-0">
+          <button type="button" onClick={() => setRegisterError('')} className="shrink-0">
             <Cross size={12} color="#7E7E7E" />
           </button>
           <p className="flex-1 text-xs font-semibold">이미 존재하는 이메일입니다.</p>

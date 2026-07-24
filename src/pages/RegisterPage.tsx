@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { signup } from '@/api/auth';
+
 import {
   LeftArrow,
   Letter,
@@ -9,6 +11,7 @@ import {
   EyeClose,
   Person,
   Phone,
+  IdCard,
   RightArrow,
   Cross,
 } from '@/components/icons';
@@ -26,18 +29,27 @@ function RegisterPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [nickname, setNickname] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [phoneNumberError, setPhoneNumberError] = useState('');
   const [nameError, setNameError] = useState('');
-  const [registerError, setRegisterError] = useState(false);
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [nicknameError, setNicknameError] = useState('');
+  const [registerError, setRegisterError] = useState('');
+
 
   const isActive =
-    emailError === '' &&
-    passwordError === '' &&
-    nameError === '' &&
-    phoneNumberError === '' &&
+    email.trim() !== '' &&
+    password.trim() !== '' &&
+    name.trim() !== '' &&
+    nickname.trim() !== '' &&
+    phoneNumber.trim() !== '' &&
+    !emailError &&
+    !passwordError &&
+    !nameError &&
+    !nicknameError &&
+    !phoneNumberError &&
     agree1 &&
     agree2 &&
     agree3 &&
@@ -77,7 +89,13 @@ function RegisterPage() {
     else setNameError('');
   }
 
-  function handlePhoneNumberValidation(value: string) {
+  function handleNicknameValidation(value: string) {
+    if (!value) setNicknameError('닉네임을 입력해주세요.');
+    else if (value.length < 2) setNicknameError('닉네임은 최소 2자 이상이어야 합니다.');
+    else setNicknameError('');
+  }
+
+  function handlePhoneNumberValidation(value: string) 
     const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
     if (!phoneNumber) setPhoneNumberError('휴대폰 번호를 입력해주세요.');
     else if (!phoneRegex.test(phoneNumber))
@@ -99,6 +117,34 @@ function RegisterPage() {
       setAllAgree(false);
     }
   }, [agree1, agree2, agree3, agree4, agree5, agree6]);
+
+  const handleRegister = async () => {
+    try {
+      const response = await signup({
+        name,
+        email,
+        password,
+        phoneNumber: phoneNumber.replace(/-/g, ''),
+        nickname,
+      });
+
+      alert(response.data.message);
+
+      navigate('/login');
+    } catch (error: any) {
+      if (!error.response) {
+        setRegisterError('서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      if (error.response?.status === 409) {
+        setRegisterError(error.response.data.message);
+        return;
+      }
+
+      setRegisterError('회원가입에 실패했습니다.');
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3 pb-10">
@@ -225,6 +271,40 @@ function RegisterPage() {
         )}
       </div>
       {nameError && <p className="w-full text-xs text-red-500">{nameError}</p>}
+
+      {/* NickName Field */}
+      <div
+        className={`flex h-12 w-full items-center border transition-colors ${
+          nicknameError ? 'border-red-500' : 'border-gray-300 focus-within:border-blue-500'
+        }`}
+      >
+        <div className="flex h-full w-12 shrink-0 items-center justify-center border-r border-gray-300 bg-gray-50">
+          <IdCard size={20} color="#7E7E7E" />
+        </div>
+        <input
+          type="text"
+          placeholder="닉네임"
+          className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
+          value={nickname}
+          onChange={(e) => {
+            setNickname(e.target.value);
+            handleNicknameValidation(e.target.value);
+          }}
+          onBlur={() => {
+            handleNicknameValidation(nickname);
+          }}
+        />
+        {nickname && (
+          <button
+            type="button"
+            onClick={() => setNickname('')}
+            className="mr-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-300"
+          >
+            <RoundFrameCross size={10} color="white" />
+          </button>
+        )}
+      </div>
+      {nicknameError && <p className="w-full text-xs text-red-500">{nicknameError}</p>}
 
       {/* Phone Number Field */}
       <div
@@ -391,17 +471,18 @@ function RegisterPage() {
       <button
         type="button"
         disabled={!isActive}
-        onClick={() => setRegisterError(true)}
+        onClick={handleRegister}
+
         className={`mt-auto w-full py-3 text-base font-bold text-white ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
       >
         가입하기
       </button>
       {registerError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">
-          <button type="button" onClick={() => setRegisterError(false)} className="shrink-0">
+          <button type="button" onClick={() => setRegisterError('')} className="shrink-0">
             <Cross size={12} color="#7E7E7E" />
           </button>
-          <p className="flex-1 text-xs font-semibold">이미 존재하는 이메일입니다.</p>
+          <p className="flex-1 text-xs font-semibold">{registerError}</p>
         </div>
       )}
     </div>

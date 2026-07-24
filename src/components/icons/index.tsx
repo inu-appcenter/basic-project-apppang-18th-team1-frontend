@@ -19,3 +19,4 @@ export { default as EmptyHeart } from './EmptyHeart';
 export { default as ShoppingBag } from './ShoppingBag';
 export { default as HandBag } from './HandBag';
 export { default as LayoutGrid } from './LayoutGrid';
+export { default as IdCard } from './IdCard';

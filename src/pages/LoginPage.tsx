@@ -64,7 +64,6 @@ function LoginPage() {
             setPassword(e.target.value);
             setPasswordError('');
           }}
-          onFocus={() => setPasswordFocused(true)}
           onBlur={handlePasswordLimit}
           placeholder="비밀번호"
           className="text-body-1 flex-1 outline-none placeholder:text-gray-300"

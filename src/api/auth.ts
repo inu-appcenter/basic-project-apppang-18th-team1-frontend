@@ -20,3 +20,7 @@ export interface LoginRequest {
 export const login = (data: LoginRequest) => {
   return instance.post('/auth/login', data);
 };
+
+export const refresh = () => {
+  return instance.post('/auth/refresh');
+};

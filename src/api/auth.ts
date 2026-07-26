@@ -24,3 +24,12 @@ export const login = (data: LoginRequest) => {
 export const refresh = () => {
   return instance.post('/auth/refresh');
 };
+
+export interface FindEmailRequest {
+  name: string;
+  phoneNumber: string;
+}
+
+export const findEmail = (data: FindEmailRequest) => {
+  return instance.post('/auth/login/findEmail', data);
+};

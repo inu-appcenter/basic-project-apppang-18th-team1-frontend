@@ -14,6 +14,7 @@ import ProductDetailPage from '@/pages/ProductDetailPage';
 import ProductListPage from '@/pages/ProductListPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
+import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/account-recovery" element={<AccountRecoveryPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

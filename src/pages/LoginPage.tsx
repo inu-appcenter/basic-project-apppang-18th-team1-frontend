@@ -116,6 +116,7 @@ function LoginPage() {
       <div className="flex w-full justify-end">
         <button
           type="button"
+          onClick={() => navigate('/account-recovery')}
           className="text-primary-200 flex items-center gap-1 text-xs font-semibold"
         >
           아이디·비밀번호 찾기

@@ -6,11 +6,6 @@ import ResetPasswordForm from '@/components/ResetPasswordForm';
 
 function AccountRecoveryPage() {
   const [tab, setTab] = useState<'findEmail' | 'resetPassword'>('findEmail');
-  function handleNameValidation(value: string) {
-    if (!value) setNameError('이름을 입력해주세요.');
-    else if (value.length < 2) setNameError('이름은 최소 2자 이상이어야 합니다.');
-    else setNameError('');
-  }
 
   return (
     <div>

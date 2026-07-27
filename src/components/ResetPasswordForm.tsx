@@ -1,18 +1,15 @@
 import { useState } from 'react';
 import { Letter, RoundFrameCross, Lock } from '@/components/icons';
 import { sendResetEmail, verifyResetCode } from '../api/supabase';
+import { resetPassword } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
 
 function ResetPasswordForm() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showVerifyInput, setShowVerifyInput] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
-  const [supabaseToken, setSupabaseToken] = useState('');
-  const [isVerified, setIsVerified] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const isActive =
@@ -38,7 +35,6 @@ function ResetPasswordForm() {
 
   const handleResetPassword = async () => {
     setError('');
-
     let supabaseToken = '';
     try {
       const verifyResponse = await verifyResetCode(email, verifyCode);
@@ -150,9 +146,11 @@ function ResetPasswordForm() {
           <Lock size={20} color="#7E7E7E" />
         </div>
         <input
-          type="email"
+          type="password"
           placeholder="새 비밀번호"
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
       <div
@@ -164,7 +162,7 @@ function ResetPasswordForm() {
           <Lock size={20} color="#7E7E7E" />
         </div>
         <input
-          type="email"
+          type="password"
           placeholder="새 비밀번호 확인"
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
         />

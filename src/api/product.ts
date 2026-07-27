@@ -7,7 +7,7 @@ export interface ProductRequest {
   size: number;
 }
 
-export const getProducts = (params: ProductRequest) => {
+export const getProductList = (params: ProductRequest) => {
   return instance.get('/products', {
     params,
   });

@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { LeftArrow } from '@/components/icons';
+import { getProductList } from '@/api/product';
 
 function ProductListPage() {
   const navigate = useNavigate();
@@ -9,7 +10,36 @@ function ProductListPage() {
   const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
   const [searchParams] = useSearchParams();
   const searchKeyword = searchParams.get('search');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
   const productCount = 10;
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getProductList({
+        category: searchKeyword ?? '',
+        sort: undefined,
+        page: 0,
+        size: 20,
+      });
+
+      setProducts(response.data.data.products);
+      setIsLastPage(response.data.data.isLastPage);
+    } catch {
+      setError('상품을 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">
@@ -49,7 +79,7 @@ function ProductListPage() {
       </div>
       {/* Product List */}
       <div className="w-full">
-        {Array.from({ length: productCount }).map((_, index) => (
+        {products.map((product) => (
           <div key={index}>
             <div className="h-[152px] w-full" />
             <div className="h-px w-full bg-gray-200" />

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { signup } from '@/api/auth';
+
 import {
   LeftArrow,
   Letter,
@@ -10,6 +11,7 @@ import {
   EyeClose,
   Person,
   Phone,
+  IdCard,
   RightArrow,
   Cross,
   IdCard,
@@ -36,6 +38,7 @@ function RegisterPage() {
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [nicknameError, setNicknameError] = useState('');
   const [registerError, setRegisterError] = useState('');
+
 
   const isActive =
     email.trim() !== '' &&
@@ -93,7 +96,7 @@ function RegisterPage() {
     else setNicknameError('');
   }
 
-  function handlePhoneNumberValidation() {
+  function handlePhoneNumberValidation(value: string) 
     const phoneRegex = /^\d{3}-\d{3,4}-\d{4}$/;
     if (!phoneNumber) setPhoneNumberError('휴대폰 번호를 입력해주세요.');
     else if (!phoneRegex.test(phoneNumber))
@@ -470,6 +473,7 @@ function RegisterPage() {
         type="button"
         disabled={!isActive}
         onClick={handleRegister}
+
         className={`mt-auto w-full py-3 text-base font-bold text-white ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
       >
         가입하기

@@ -11,36 +11,3 @@ export interface SignupRequest {
 export const signup = (data: SignupRequest) => {
   return instance.post('/auth/signup', data);
 };
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export const login = (data: LoginRequest) => {
-  return instance.post('/auth/login', data);
-};
-
-export const refresh = () => {
-  return instance.post('/auth/refresh');
-};
-
-export interface FindEmailRequest {
-  name: string;
-  phoneNumber: string;
-}
-
-export const findEmail = (data: FindEmailRequest) => {
-  return instance.post('/auth/login/findEmail', data);
-};
-
-export interface ResetPasswordRequest {
-  email: string;
-  newPassword: string;
-  passwordCheck: string;
-  supabaseToken: string;
-}
-
-export const resetPassword = (data: ResetPasswordRequest) => {
-  return instance.post('/auth/password/reset', data);
-};

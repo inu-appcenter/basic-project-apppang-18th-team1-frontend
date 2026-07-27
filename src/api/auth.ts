@@ -33,3 +33,14 @@ export interface FindEmailRequest {
 export const findEmail = (data: FindEmailRequest) => {
   return instance.post('/auth/login/findEmail', data);
 };
+
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+  passwordCheck: string;
+  supabaseToken: string;
+}
+
+export const resetPassword = (data: ResetPasswordRequest) => {
+  return instance.post('/auth/password/reset', data);
+};

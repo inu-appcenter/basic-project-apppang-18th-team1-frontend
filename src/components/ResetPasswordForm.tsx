@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Letter, RoundFrameCross, Lock } from '@/components/icons';
-import { sendResetEmail } from '../api/supabase';
+import { sendResetEmail, verifyResetCode } from '../api/supabase';
 import { useNavigate } from 'react-router-dom';
 
 function ResetPasswordForm() {
@@ -10,6 +10,17 @@ function ResetPasswordForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showVerifyInput, setShowVerifyInput] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('');
+  const [supabaseToken, setSupabaseToken] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordCheck, setPasswordCheck] = useState('');
+  const isActive =
+    email.trim() !== '' &&
+    verifyCode.trim() !== '' &&
+    newPassword.trim() !== '' &&
+    passwordCheck.trim() !== '' &&
+    newPassword === passwordCheck;
 
   const handleSendEmail = async () => {
     setError('');
@@ -22,6 +33,54 @@ function ResetPasswordForm() {
         return;
       }
       setError(error.response.data.msg);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setError('');
+
+    let supabaseToken = '';
+    try {
+      const verifyResponse = await verifyResetCode(email, verifyCode);
+
+      supabaseToken = verifyResponse.data.access_token;
+    } catch (error: any) {
+      if (!error.response) {
+        setError('인증 서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      setError(error.response.data.msg);
+      return;
+    }
+
+    try {
+      const response = await resetPassword({
+        email,
+        newPassword,
+        passwordCheck,
+        supabaseToken,
+      });
+
+      alert(response.data.message);
+
+      navigate('/login');
+    } catch (error: any) {
+      if (!error.response) {
+        setError('서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      switch (error.response.status) {
+        case 400:
+        case 401:
+        case 404:
+          setError(error.response.data.message);
+          break;
+
+        default:
+          setError('비밀번호 변경에 실패했습니다.');
+      }
     }
   };
 
@@ -74,6 +133,8 @@ function ResetPasswordForm() {
           <div className="flex h-12 flex-1 items-center border border-gray-300 transition-colors focus-within:border-blue-500">
             <input
               type="text"
+              value={verifyCode}
+              onChange={(e) => setVerifyCode(e.target.value)}
               placeholder="인증번호 입력"
               className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
             />
@@ -108,6 +169,14 @@ function ResetPasswordForm() {
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
         />
       </div>
+      <button
+        type="button"
+        disabled={!isActive}
+        onClick={handleResetPassword}
+        className={`w-full py-3 text-base font-bold text-white ${isActive ? 'bg-blue-500' : 'bg-gray-200'}`}
+      >
+        비밀번호 변경하기
+      </button>
     </div>
   );
 }

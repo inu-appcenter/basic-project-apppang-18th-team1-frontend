@@ -19,3 +19,11 @@ export const sendResetEmail = (email: string) => {
     create_user: true,
   });
 };
+
+export const verifyResetCode = (email: string, token: string) => {
+  return supabase.post('/auth/v1/verify', {
+    type: 'email',
+    email,
+    token,
+  });
+};

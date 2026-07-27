@@ -12,8 +12,6 @@ const supabase = axios.create({
 export default supabase;
 
 export const sendResetEmail = (email: string) => {
-  console.log(import.meta.env.VITE_SUPABASE_URL);
-
   return supabase.post('/auth/v1/otp', {
     email,
     create_user: true,

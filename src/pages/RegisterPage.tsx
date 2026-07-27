@@ -14,6 +14,7 @@ import {
   IdCard,
   RightArrow,
   Cross,
+  IdCard,
 } from '@/components/icons';
 
 function RegisterPage() {

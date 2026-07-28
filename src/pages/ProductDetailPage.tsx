@@ -1,7 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { LeftArrow, FilledHeart, EmptyHeart, Share } from '@/components/icons';
-import { getProductDetail, type ProductDetail, type ProductVariant } from '@/api/product';
+import {
+  getProductDetail,
+  toggleWishlist,
+  type ProductDetail,
+  type ProductVariant,
+} from '@/api/product';
 
 // TODO: 배포된 API의 variants가 아직 전부 빈 배열이라 임시로 넣어둔 더미 데이터.
 // 백엔드가 실제 variants를 내려주면 이 상수와 아래 fallback 코드를 제거할 것.
@@ -71,6 +76,23 @@ function ProductDetailPage() {
   const selectedVariant = product?.variants.find(
     (variant) => variant.variantId === selectedVariantId,
   );
+
+  const handleWishClick = async () => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await toggleWishlist(productId);
+      setIsWished(response.data.isWishlist);
+    } catch (err) {
+      console.error('찜하기 요청 실패', err);
+    }
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -162,7 +184,7 @@ function ProductDetailPage() {
         <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-end pr-4 pb-4">
           <button
             type="button"
-            onClick={() => setIsWished((prev) => !prev)}
+            onClick={handleWishClick}
             className="pointer-events-auto flex items-center justify-center rounded-full bg-white p-1.5"
           >
             {isWished ? (

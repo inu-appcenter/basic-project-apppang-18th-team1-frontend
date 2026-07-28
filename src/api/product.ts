@@ -68,3 +68,14 @@ export interface ProductDetail {
 export const getProductDetail = (productId: string | number, signal?: AbortSignal) => {
   return instance.get<ProductDetail>(`/products/${productId}`, { signal });
 };
+
+export interface WishlistToggleResponse {
+  isWishlist: boolean;
+  message: string;
+}
+
+export const toggleWishlist = (productId: string | number, signal?: AbortSignal) => {
+  return instance.post<WishlistToggleResponse>(`/products/${productId}/wishlist`, null, {
+    signal,
+  });
+};

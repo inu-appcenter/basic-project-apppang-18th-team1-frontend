@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Letter, RoundFrameCross, Lock } from '@/components/icons';
 import { sendResetEmail, verifyResetCode } from '../api/supabase';
 import { resetPassword } from '@/api/auth';
@@ -12,9 +12,11 @@ function ResetPasswordForm() {
   const [verifyCode, setVerifyCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
+  const [supabaseToken, setSupabaseToken] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
+
   const isActive =
-    email.trim() !== '' &&
-    verifyCode.trim() !== '' &&
+    isVerified &&
     newPassword.trim() !== '' &&
     passwordCheck.trim() !== '' &&
     newPassword === passwordCheck;
@@ -33,13 +35,18 @@ function ResetPasswordForm() {
     }
   };
 
-  const handleResetPassword = async () => {
+  const handleVerifyCode = async () => {
     setError('');
-    let supabaseToken = '';
-    try {
-      const verifyResponse = await verifyResetCode(email, verifyCode);
 
-      supabaseToken = verifyResponse.data.access_token;
+    try {
+      const response = await verifyResetCode(email, verifyCode);
+
+      console.log('verify response', response.data);
+
+      setSupabaseToken(response.data.access_token);
+      setIsVerified(true);
+
+      alert('이메일 인증이 완료되었습니다.');
     } catch (error: any) {
       if (!error.response) {
         setError('인증 서버와 연결할 수 없습니다.');
@@ -47,8 +54,17 @@ function ResetPasswordForm() {
       }
 
       setError(error.response.data.msg);
-      return;
     }
+  };
+
+  const handleResetPassword = async () => {
+    setError('');
+    console.log({
+      email,
+      newPassword,
+      passwordCheck,
+      supabaseToken,
+    });
 
     try {
       const response = await resetPassword({
@@ -59,7 +75,6 @@ function ResetPasswordForm() {
       });
 
       alert(response.data.message);
-
       navigate('/login');
     } catch (error: any) {
       if (!error.response) {
@@ -67,18 +82,13 @@ function ResetPasswordForm() {
         return;
       }
 
-      switch (error.response.status) {
-        case 400:
-        case 401:
-        case 404:
-          setError(error.response.data.message);
-          break;
-
-        default:
-          setError('비밀번호 변경에 실패했습니다.');
-      }
+      setError(error.response.data.message);
     }
   };
+
+  useEffect(() => {
+    console.log('supabaseToken', supabaseToken);
+  }, [supabaseToken]);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3 pb-10">
@@ -126,17 +136,27 @@ function ResetPasswordForm() {
       )}
       {showVerifyInput && (
         <div className="flex w-full gap-2">
-          <div className="flex h-12 flex-1 items-center border border-gray-300 transition-colors focus-within:border-blue-500">
+          <div className="flex h-12 flex-1 items-center border border-gray-300 focus-within:border-blue-500">
             <input
               type="text"
               value={verifyCode}
               onChange={(e) => setVerifyCode(e.target.value)}
               placeholder="인증번호 입력"
-              className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
+              className="flex-1 px-3 text-sm font-bold outline-none"
             />
           </div>
+
+          <button
+            type="button"
+            onClick={handleVerifyCode}
+            disabled={!verifyCode.trim() || isVerified}
+            className="bg-primary-200 h-12 rounded px-4 text-sm font-semibold text-white disabled:bg-gray-300"
+          >
+            {isVerified ? '인증완료' : '인증확인'}
+          </button>
         </div>
       )}
+      {isVerified && <p className="text-sm text-green-600">✓ 이메일 인증이 완료되었습니다.</p>}
       <div
         className={
           'flex h-12 w-full items-center border border-gray-300 transition-colors focus-within:border-blue-500'
@@ -163,6 +183,8 @@ function ResetPasswordForm() {
         </div>
         <input
           type="password"
+          value={passwordCheck}
+          onChange={(e) => setPasswordCheck(e.target.value)}
           placeholder="새 비밀번호 확인"
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
         />

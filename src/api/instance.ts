@@ -10,6 +10,10 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use((config) => {
+  const publicUrls = ['/auth/login', '/auth/signup', '/auth/password/reset', '/auth/findEmail'];
+  if (config.url && publicUrls.includes(config.url)) {
+    return config;
+  }
   const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

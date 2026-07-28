@@ -1,45 +1,90 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LeftArrow } from '@/components/icons';
-import { getProductList } from '@/api/product';
+import { getProductList, type Product } from '@/api/product';
+import ProductCard from '@/components/ProductCard';
+import { CATEGORY_LABELS } from '@/constants/category';
+
+const SORT_OPTIONS = ['랭킹순', '최신순', '최저가순', '최고가순'] as const;
+const SORT_MAP: Record<
+  (typeof SORT_OPTIONS)[number],
+  'ranking' | 'latest' | 'priceLow' | 'priceHigh'
+> = {
+  랭킹순: 'ranking',
+  최신순: 'latest',
+  최저가순: 'priceLow',
+  최고가순: 'priceHigh',
+};
 
 function ProductListPage() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const SORT_OPTIONS = ['랭킹순', '최신순', '최저가순', '최고가순'];
-  const [selectedSort, setSelectedSort] = useState(SORT_OPTIONS[0]);
+  const [selectedSort, setSelectedSort] = useState<(typeof SORT_OPTIONS)[number]>(SORT_OPTIONS[0]);
   const [searchParams] = useSearchParams();
-  const searchKeyword = searchParams.get('search');
+  const categoryParam = searchParams.get('category') ?? undefined;
+  const searchKeyword = searchParams.get('search') ?? '';
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
-  const [isLastPage, setIsLastPage] = useState(false);
-  const productCount = 10;
+  const [totalPages, setTotalPages] = useState(0);
+  const isLastPage = totalPages === 0 || page + 1 >= totalPages;
+  const pageTitle = categoryParam
+    ? (CATEGORY_LABELS[categoryParam] ?? categoryParam)
+    : searchKeyword;
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-
-      const response = await getProductList({
-        category: searchKeyword ?? '',
-        sort: undefined,
-        page: 0,
-        size: 20,
-      });
-
-      setProducts(response.data.data.products);
-      setIsLastPage(response.data.data.isLastPage);
-    } catch {
-      setError('상품을 불러오지 못했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 카테고리/정렬이 바뀌면 이전 page(예: 더보기로 늘어난 값)를 그대로 요청하지 않도록
+  // 같은 effect 안에서 필터 변경 여부를 확인해 요청 page를 0으로 맞춘다.
+  const filterKey = `${categoryParam ?? ''}::${selectedSort}`;
+  const prevFilterKeyRef = useRef(filterKey);
 
   useEffect(() => {
+    const filterChanged = filterKey !== prevFilterKeyRef.current;
+    prevFilterKeyRef.current = filterKey;
+
+    if (filterChanged && page !== 0) {
+      setPage(0);
+      setProducts([]);
+      return undefined; // page가 0으로 바뀌면 이 effect가 다시 실행되면서 실제 요청을 보냄
+    }
+
+    const controller = new AbortController();
+
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await getProductList(
+          {
+            category: categoryParam,
+            sort: SORT_MAP[selectedSort],
+            // TODO: 명세상 page는 0-indexed(기본값 0)인데, 실제 배포된 API는 page=0을 보내면
+            // 400("page는 0 이상이어야 합니다")을 반환하고 page=1을 보내야 첫 페이지가 옴.
+            // 백엔드가 내부적으로 1을 빼는 것으로 추정되어 +1 보정. 백엔드 수정되면 제거 필요.
+            page: page + 1,
+            size: 20,
+          },
+          controller.signal, // instance.get 두번째 인자로 signal 전달
+        );
+
+        const { products: newProducts, totalPages: newTotalPages } = response.data;
+
+        setProducts((prev) => (page === 0 ? newProducts : [...prev, ...newProducts]));
+        setTotalPages(newTotalPages);
+      } catch (err) {
+        if (controller.signal.aborted) return; // 취소된 요청은 무시
+        console.error('에러 발생', err);
+        setError('상품을 불러오지 못했습니다.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
     fetchProducts();
-  }, []);
+
+    return () => controller.abort(); // 클린업 시 이전 요청 취소
+  }, [filterKey, page, categoryParam, selectedSort]);
 
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">
@@ -48,9 +93,9 @@ function ProductListPage() {
         <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
           <LeftArrow size={24} color="#212B36" />
         </button>
-
-        <h1 className="text-[20px] leading-none font-bold">{searchKeyword}</h1>
+        <h1 className="text-[20px] leading-none font-bold">{pageTitle}</h1>
       </header>
+
       {/* Sort Dropdown */}
       <div className="flex w-full justify-end border-b border-gray-200 px-3 py-2">
         <div className="relative text-sm">
@@ -77,16 +122,35 @@ function ProductListPage() {
           </ul>
         </div>
       </div>
+
       {/* Product List */}
-      <div className="w-full">
-        {products.map((product) => (
-          <div key={index}>
-            <div className="h-[152px] w-full" />
-            <div className="h-px w-full bg-gray-200" />
-          </div>
-        ))}
-      </div>
-      <div className="w-full py-3 text-center text-sm text-gray-300">마지막 상품입니다</div>
+      {error && <div className="w-full py-10 text-center text-sm text-red-400">{error}</div>}
+
+      {!error && (
+        <div className="w-full">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+
+      {loading && (
+        <div className="w-full py-4 text-center text-sm text-gray-400">불러오는 중...</div>
+      )}
+
+      {!loading && !error && !isLastPage && products.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setPage((prev) => prev + 1)}
+          className="w-full py-3 text-center text-sm text-gray-500"
+        >
+          더보기
+        </button>
+      )}
+
+      {isLastPage && !loading && products.length > 0 && (
+        <div className="w-full py-3 text-center text-sm text-gray-300">마지막 상품입니다</div>
+      )}
     </div>
   );
 }

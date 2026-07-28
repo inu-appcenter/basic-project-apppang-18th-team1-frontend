@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import type { Product } from '@/api/product';
 
 interface ProductCardProps {
@@ -5,8 +6,14 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex w-full gap-3 border-b border-gray-200 p-3">
+    <button
+      type="button"
+      onClick={() => navigate(`/products/${product.id}`)}
+      className="flex w-full gap-3 border-b border-gray-200 p-3 text-left"
+    >
       {/* 상품 이미지 */}
       <img
         src={product.mainImageUrl}
@@ -44,7 +51,7 @@ function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

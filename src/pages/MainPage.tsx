@@ -1,20 +1,19 @@
 import type { ReactNode } from 'react';
 import {
   Camera,
-  Clock,
-  Coffee,
+  ChefHat,
+  Dumbbell,
   Gift,
-  Globe,
-  Leaf,
   Monitor,
   Search,
-  ShoppingBag,
-  Star,
+  Smartphone,
+  Sparkles,
   Tag,
-  Zap,
+  Utensils,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CATEGORY_LABELS } from '@/constants/category';
 
 // ---- Types ----
 
@@ -40,23 +39,23 @@ const BANNERS: Banner[] = [
   { id: 5, bgColor: 'bg-secondary-100' },
 ];
 
-const CATEGORIES: Category[] = [
-  {
-    id: 1,
-    label: '자주산상품',
-    path: '/products?category=frequent',
-    icon: <ShoppingBag size={40} />,
-  },
-  { id: 2, label: '쿠팡플레이', path: '/products?category=play', icon: <Monitor size={40} /> },
-  { id: 3, label: '로켓프레시', path: '/products?category=fresh', icon: <Leaf size={40} /> },
-  { id: 4, label: '쿠팡이츠', path: '/products?category=eats', icon: <Coffee size={40} /> },
-  { id: 5, label: '골드박스', path: '/products?category=goldbox', icon: <Gift size={40} /> },
-  { id: 6, label: '반짝세일', path: '/products?category=flash', icon: <Clock size={40} /> },
-  { id: 7, label: '패션/잡화', path: '/products?category=fashion', icon: <Tag size={40} /> },
-  { id: 8, label: 'R.LUX', path: '/products?category=luxury', icon: <Star size={40} /> },
-  { id: 9, label: '로켓배송', path: '/products?category=rocket', icon: <Zap size={40} /> },
-  { id: 10, label: '로켓직구', path: '/products?category=global', icon: <Globe size={40} /> },
-];
+const CATEGORY_ICONS: Record<string, ReactNode> = {
+  '1': <Tag size={40} />,
+  '2': <Monitor size={40} />,
+  '3': <Smartphone size={40} />,
+  '4': <Utensils size={40} />,
+  '5': <Dumbbell size={40} />,
+  '6': <Gift size={40} />,
+  '7': <Sparkles size={40} />,
+  '8': <ChefHat size={40} />,
+};
+
+const CATEGORIES: Category[] = Object.entries(CATEGORY_LABELS).map(([category, label], index) => ({
+  id: index + 1,
+  label,
+  path: `/products?category=${category}`,
+  icon: CATEGORY_ICONS[category],
+}));
 
 // ---- Main Component ----
 

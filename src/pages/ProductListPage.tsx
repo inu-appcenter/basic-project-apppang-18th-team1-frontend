@@ -86,7 +86,6 @@ function ProductListPage() {
             discountRate: item.discountRate,
             salePrice: item.salePrice,
             mainImageUrl: item.thumbnailUrl,
-            unitPriceText: item.unitPriceText,
           }));
 
           setProducts((prev) => (page === 0 ? mapped : [...prev, ...mapped]));

@@ -14,7 +14,6 @@ export interface SearchProduct {
   originalPrice: number;
   discountRate: number;
   salePrice: number;
-  unitPriceText: string | null;
   rating: number;
   reviewCount: number;
 }

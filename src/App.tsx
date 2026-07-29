@@ -5,7 +5,6 @@ import CommonLayout from '@/layouts/CommonLayout';
 import CommonLayoutNoHeader from '@/layouts/CommonLayoutNoHeader';
 import CommonLayoutNoNavigationBar from '@/layouts/CommonLayoutNoNavigationBar';
 import CartPage from '@/pages/CartPage';
-import ChatbotPage from '@/pages/ChatbotPage';
 import LoginPage from '@/pages/LoginPage';
 import MainPage from '@/pages/MainPage';
 import MyPage from '@/pages/MyPage';
@@ -32,7 +31,6 @@ function App() {
         </Route>
 
         <Route element={<CommonLayoutNoNavigationBar />}>
-          <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/cart" element={<CartPage />} />
         </Route>
 

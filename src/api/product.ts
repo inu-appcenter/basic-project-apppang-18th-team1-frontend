@@ -15,7 +15,6 @@ export interface Product {
   discountRate: number;
   salePrice: number;
   mainImageUrl: string;
-  unitPriceText: string | null;
 }
 
 export interface ProductListResponse {
@@ -57,7 +56,6 @@ export interface ProductDetail {
   originalPrice: number;
   discountRate: number;
   salePrice: number;
-  unitPriceText: string | null;
   variants: ProductVariant[];
   detailImages: string[];
 }

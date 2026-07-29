@@ -234,11 +234,6 @@ function ProductDetailPage() {
           <span className="text-xl font-bold text-red-300">
             {product.salePrice.toLocaleString()}원
           </span>
-          {product.unitPriceText && (
-            <span className="ml-1 self-end text-base font-bold text-red-300">
-              {product.unitPriceText}
-            </span>
-          )}
           {product.discountRate > 0 && (
             <span className="text-sm text-gray-400 line-through">
               {product.originalPrice.toLocaleString()}원
@@ -275,7 +270,7 @@ function ProductDetailPage() {
           {selectedVariant && (
             <div className="flex items-center gap-2 px-1">
               <span className="text-lg font-bold text-red-300">
-                {selectedVariant.price.toLocaleString()}원
+                {(product.salePrice + selectedVariant.price).toLocaleString()}원
               </span>
               <span className="text-sm text-gray-500">
                 {selectedVariant.saveAmount.toLocaleString()}원 할인

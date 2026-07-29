@@ -34,7 +34,7 @@ function ProductCard({ product }: ProductCardProps) {
           {product.originPrice.toLocaleString()}원
         </p>
 
-        {/* 할인율 + 판매가 + 단위가격 */}
+        {/* 할인율 + 판매가 */}
         <div className="flex items-center gap-1">
           {product.discountRate > 0 && (
             <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
@@ -45,10 +45,6 @@ function ProductCard({ product }: ProductCardProps) {
           <span className="text-lg font-bold text-red-300">
             {product.salePrice.toLocaleString()}원
           </span>
-
-          {product.unitPriceText && (
-            <span className="text-xs text-gray-500">{product.unitPriceText}</span>
-          )}
         </div>
       </div>
     </button>

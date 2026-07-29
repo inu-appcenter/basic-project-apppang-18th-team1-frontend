@@ -7,6 +7,7 @@ import {
   type ProductDetail,
   type ProductVariant,
 } from '@/api/product';
+import { addToCart } from '@/api/cart';
 
 // TODO: 배포된 API의 variants가 아직 전부 빈 배열이라 임시로 넣어둔 더미 데이터.
 // 백엔드가 실제 variants를 내려주면 이 상수와 아래 fallback 코드를 제거할 것.
@@ -39,6 +40,7 @@ function ProductDetailPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (!productId) return undefined;
@@ -58,6 +60,7 @@ function ProductDetailPage() {
         setIsWished(response.data.isWishlist);
         setCurrentImage(0);
         setSelectedVariantId(variants.find((variant) => variant.isPopular)?.variantId ?? null);
+        setQuantity(1);
       } catch (err) {
         if (controller.signal.aborted) return;
         console.error('에러 발생', err);
@@ -91,6 +94,32 @@ function ProductDetailPage() {
       setIsWished(response.data.isWishlist);
     } catch (err) {
       console.error('찜하기 요청 실패', err);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedVariantId) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
+
+    try {
+      const response = await addToCart({
+        productId: Number(productId),
+        optionId: selectedVariantId,
+        quantity,
+      });
+      alert(response.data.message);
+    } catch (err) {
+      console.error('장바구니 담기 실패', err);
     }
   };
 
@@ -268,7 +297,7 @@ function ProductDetailPage() {
           </div>
 
           {selectedVariant && (
-            <div className="flex items-center gap-2 px-1">
+            <div className="flex flex-wrap items-center gap-2 px-1">
               <span className="text-lg font-bold text-red-300">
                 {(product.salePrice + selectedVariant.price).toLocaleString()}원
               </span>
@@ -276,6 +305,25 @@ function ProductDetailPage() {
                 {selectedVariant.saveAmount.toLocaleString()}원 할인
               </span>
               <span className="text-sm text-gray-500">{selectedVariant.shippingType}</span>
+
+              {/* 수량 선택 (증감 버튼 방식) */}
+              <div className="flex items-center rounded border border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                  className="px-2 py-1 text-sm text-[#212B36]"
+                >
+                  -
+                </button>
+                <span className="w-6 text-center text-sm">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((prev) => prev + 1)}
+                  className="px-2 py-1 text-sm text-[#212B36]"
+                >
+                  +
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -296,7 +344,11 @@ function ProductDetailPage() {
       {/* Bottom CTA */}
       <div className="fixed bottom-16 left-1/2 z-40 w-full max-w-120 -translate-x-1/2 bg-white px-3 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
         <div className="flex gap-2">
-          <button className="text-primary-200 border-primary-200 flex-1 rounded border py-3 font-bold">
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            className="text-primary-200 border-primary-200 flex-1 rounded border py-3 font-bold"
+          >
             장바구니 담기
           </button>
           <button className="bg-primary-200 flex-1 rounded py-3 font-bold text-white">

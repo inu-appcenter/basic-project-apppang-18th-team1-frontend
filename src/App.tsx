@@ -14,6 +14,7 @@ import ProductListPage from '@/pages/ProductListPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
 import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
+import OrderPage from '@/pages/OrderPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
 
         <Route element={<CommonLayoutNoNavigationBar />}>
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/order" element={<OrderPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>

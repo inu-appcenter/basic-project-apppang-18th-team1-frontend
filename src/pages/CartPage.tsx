@@ -8,6 +8,7 @@ import {
   type CartShippingGroup,
   type CartListSummary,
 } from '@/api/cart';
+import { createOrder } from '@/api/order';
 
 const EMPTY_SUMMARY: CartListSummary = {
   totalProductPrice: 0,
@@ -256,6 +257,21 @@ function CartPage() {
     }
   };
 
+  const handleOrder = async () => {
+    if (selectedItems.length === 0) {
+      alert('주문할 상품을 선택해주세요.');
+      return;
+    }
+
+    try {
+      const response = await createOrder();
+      navigate('/order', { state: { order: response.data.data } });
+    } catch (err) {
+      console.error('주문 생성 실패', err);
+      alert('주문에 실패했습니다.');
+    }
+  };
+
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">
       {/* Header */}
@@ -373,6 +389,7 @@ function CartPage() {
         </div>
         <button
           type="button"
+          onClick={handleOrder}
           className="bg-primary-200 w-full px-3 py-4 text-base font-bold text-white"
         >
           총 {itemCount}개의 상품 구매하기

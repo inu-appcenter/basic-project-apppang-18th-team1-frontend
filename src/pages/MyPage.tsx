@@ -1,8 +1,31 @@
+import { useEffect, useRef } from 'react';
 import { Human, Gear, Receipt, FilledHeart } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '@/api/auth';
 
 function MyPage() {
   const navigate = useNavigate();
+  const hasAlertedRef = useRef(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem('accessToken') && !hasAlertedRef.current) {
+      hasAlertedRef.current = true;
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('로그아웃 실패', err);
+    } finally {
+      localStorage.removeItem('accessToken');
+      navigate('/login');
+    }
+  };
+
   const menuItems = [
     {
       label: '주문내역',
@@ -43,6 +66,14 @@ function MyPage() {
         ))}
       </div>
       <div className="my-2 h-2 w-full bg-gray-100" />
+      <div className="border-t border-gray-100" />
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="px-4 py-3 text-center text-xs text-gray-400"
+      >
+        로그아웃
+      </button>
     </div>
   );
 }

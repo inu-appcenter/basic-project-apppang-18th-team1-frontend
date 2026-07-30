@@ -169,14 +169,14 @@ function MainPage() {
             <div className="bg-secondary-100 h-full min-w-full" />
           )}
         </div>
-        <div className="z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
+        <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
           {banners.map((banner, index) => (
             <button
               key={banner.rank}
               type="button"
               aria-label={`배너 ${index + 1} 보기`}
               onClick={() => setCurrentBanner(index)}
-              className={`h-2 w-2 rounded-full transition-colors ${
+              className={`pointer-events-auto h-2 w-2 rounded-full transition-colors ${
                 index === currentBanner ? 'bg-black' : 'bg-gray-200'
               }`}
             />

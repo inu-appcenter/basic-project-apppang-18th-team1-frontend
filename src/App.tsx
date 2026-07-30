@@ -15,6 +15,7 @@ import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
 import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
 import OrderPage from '@/pages/OrderPage';
+import OrderListPage from '@/pages/OrderListPage';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route element={<CommonLayoutNoNavigationBar />}>
           <Route path="/cart" element={<CartPage />} />
           <Route path="/order" element={<OrderPage />} />
+          <Route path="/order-list" element={<OrderListPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>

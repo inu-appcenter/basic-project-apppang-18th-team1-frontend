@@ -27,3 +27,32 @@ export interface CreateOrderResponse {
 export const createOrder = (signal?: AbortSignal) => {
   return instance.post<CreateOrderResponse>('/orders', undefined, { signal });
 };
+
+export interface OrderListItem {
+  orderId: number;
+  orderStatus: string;
+  finalPaymentPrice: number;
+  createdAt: string;
+  items: OrderItem[];
+}
+
+export interface OrderListResponse {
+  message: string;
+  data: OrderListItem[];
+}
+
+export const getOrderList = (signal?: AbortSignal) => {
+  return instance.get<OrderListResponse>('/orders', { signal });
+};
+
+export interface CancelOrderResponse {
+  message: string;
+  data: {
+    orderId: number;
+    orderStatus: string;
+  };
+}
+
+export const cancelOrder = (orderId: number, signal?: AbortSignal) => {
+  return instance.patch<CancelOrderResponse>(`/orders/${orderId}/cancel`, null, { signal });
+};

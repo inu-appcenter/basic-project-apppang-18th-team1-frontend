@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
-import { LeftArrow, FilledHeart, EmptyHeart, Share } from '@/components/icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { LeftArrow, FilledHeart, EmptyHeart, Share, Pencil, Star } from '@/components/icons';
 import {
   getProductDetail,
   toggleWishlist,
@@ -8,6 +8,17 @@ import {
   type ProductVariant,
 } from '@/api/product';
 import { addToCart } from '@/api/cart';
+import {
+  createReview,
+  getReviews,
+  updateReview,
+  getReviewOwnership,
+  type ReviewListItem,
+} from '@/api/review';
+
+const REVIEW_PAGE_SIZE = 10;
+const REVIEW_CONTENT_PREVIEW_LIMIT = 100;
+const REVIEW_CONTENT_MAX_LENGTH = 1000;
 
 function ProductDetailPage() {
   const navigate = useNavigate();
@@ -20,6 +31,89 @@ function ProductDetailPage() {
   const [error, setError] = useState('');
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviews, setReviews] = useState<ReviewListItem[]>([]);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [expandedReviewIds, setExpandedReviewIds] = useState<Set<number>>(new Set());
+  const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editContent, setEditContent] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [ownedReviewIds, setOwnedReviewIds] = useState<Set<number>>(new Set());
+
+  const loadReviewOwnership = useCallback(
+    async (reviewList: ReviewListItem[]) => {
+      if (!productId || !localStorage.getItem('accessToken') || reviewList.length === 0) return;
+
+      const results = await Promise.all(
+        reviewList.map(async (review) => {
+          try {
+            const response = await getReviewOwnership(productId, review.reviewId);
+            return response.data.isOwner ? review.reviewId : null;
+          } catch (err) {
+            console.error('리뷰 작성자 확인 실패', err);
+            return null;
+          }
+        }),
+      );
+
+      setOwnedReviewIds((prev) => {
+        const next = new Set(prev);
+        results.forEach((reviewId) => {
+          if (reviewId !== null) next.add(reviewId);
+        });
+        return next;
+      });
+    },
+    [productId],
+  );
+
+  const loadReviews = useCallback(
+    async (page: number) => {
+      if (!productId) return;
+
+      try {
+        setReviewsLoading(true);
+        const response = await getReviews(productId, { page, size: REVIEW_PAGE_SIZE });
+        setReviews((prev) =>
+          page === 1 ? response.data.reviews : [...prev, ...response.data.reviews],
+        );
+        setReviewsPage(response.data.page);
+        setReviewsTotalPages(response.data.totalPages);
+        loadReviewOwnership(response.data.reviews);
+      } catch (err) {
+        console.error('리뷰 조회 실패', err);
+      } finally {
+        setReviewsLoading(false);
+      }
+    },
+    [productId, loadReviewOwnership],
+  );
+
+  useEffect(() => {
+    loadReviews(1);
+  }, [loadReviews]);
+
+  const toggleReviewExpand = (reviewId: number) => {
+    setExpandedReviewIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(reviewId)) {
+        next.delete(reviewId);
+      } else {
+        next.add(reviewId);
+      }
+      return next;
+    });
+  };
+
+  const handleLoadMoreReviews = () => {
+    loadReviews(reviewsPage + 1);
+  };
 
   useEffect(() => {
     if (!productId) return undefined;
@@ -99,6 +193,108 @@ function ProductDetailPage() {
       alert(response.data.message);
     } catch (err) {
       console.error('장바구니 담기 실패', err);
+    }
+  };
+
+  const handleToggleReviewForm = () => {
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    setShowReviewForm((prev) => !prev);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (reviewRating === 0) {
+      alert('별점을 선택해주세요.');
+      return;
+    }
+
+    if (!reviewContent.trim()) {
+      alert('리뷰 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsSubmittingReview(true);
+      const response = await createReview(productId, {
+        rating: reviewRating,
+        content: reviewContent,
+        mediaList: [],
+      });
+      alert(response.data.message);
+      setReviewRating(0);
+      setReviewContent('');
+      setShowReviewForm(false);
+      loadReviews(1);
+    } catch (err) {
+      console.error('리뷰 작성 실패', err);
+      alert('리뷰 작성에 실패했습니다.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handleToggleEditReview = (review: ReviewListItem) => {
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (editingReviewId === review.reviewId) {
+      setEditingReviewId(null);
+      return;
+    }
+
+    setEditingReviewId(review.reviewId);
+    setEditRating(review.rating);
+    setEditContent(review.content);
+  };
+
+  const handleUpdateReview = async (reviewId: number) => {
+    if (!productId) return;
+
+    if (editRating === 0) {
+      alert('별점을 선택해주세요.');
+      return;
+    }
+
+    if (!editContent.trim()) {
+      alert('리뷰 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsSubmittingEdit(true);
+      const response = await updateReview(productId, reviewId, {
+        rating: editRating,
+        content: editContent,
+      });
+      alert(response.data.message);
+      setReviews((prev) =>
+        prev.map((review) =>
+          review.reviewId === reviewId
+            ? { ...review, rating: editRating, content: editContent }
+            : review,
+        ),
+      );
+      setEditingReviewId(null);
+    } catch (err) {
+      console.error('리뷰 수정 실패', err);
+      alert('리뷰 수정에 실패했습니다.');
+    } finally {
+      setIsSubmittingEdit(false);
     }
   };
 
@@ -319,6 +515,206 @@ function ProductDetailPage() {
             className="w-full"
           />
         ))}
+      </div>
+      <div className="my-2 h-2 w-full bg-gray-100" />
+      {/* 상품 리뷰 */}
+      <div className="mb-20 flex flex-col">
+        <p className="px-2 pt-4 pb-3 text-base font-bold text-[#212B36]">상품 리뷰</p>
+        <div className="border-t border-gray-100" />
+        <p className="px-2 py-3 text-xs text-gray-400">
+          동일한 상품에 대해 작성된 상품평으로, 판매자는 다를 수 있습니다.
+        </p>
+        <div className="flex items-center justify-end px-2 pb-5">
+          <button
+            type="button"
+            onClick={handleToggleReviewForm}
+            className="border-primary-200 text-primary-200 flex items-center gap-1 rounded border px-3 py-1.5 text-sm font-bold"
+          >
+            <Pencil size={15} color="#346AFF" /> 리뷰 작성하기
+          </button>
+        </div>
+
+        {showReviewForm && (
+          <div className="flex flex-col gap-4 border-t border-gray-100 px-2 pt-4 pb-6">
+            {/* 별점 */}
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5].map((score) => (
+                <button
+                  key={score}
+                  type="button"
+                  onClick={() => setReviewRating(score)}
+                  className="p-0.5"
+                >
+                  <Star
+                    size={28}
+                    color={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
+                    fill={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
+                  />
+                </button>
+              ))}
+            </div>
+
+            {/* 리뷰 본문 */}
+            <textarea
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+              placeholder="상품에 대한 리뷰를 남겨주세요."
+              maxLength={REVIEW_CONTENT_MAX_LENGTH}
+              className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
+            />
+
+            <button
+              type="button"
+              onClick={handleSubmitReview}
+              disabled={isSubmittingReview}
+              className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
+            >
+              등록하기
+            </button>
+          </div>
+        )}
+
+        {/* 구분선 */}
+        <div className="border-t border-gray-100" />
+
+        {/* 리뷰 목록 */}
+        <div className="flex flex-col">
+          {!reviewsLoading && reviews.length === 0 && (
+            <p className="px-2 py-10 text-center text-sm text-gray-400">
+              아직 작성된 리뷰가 없습니다.
+            </p>
+          )}
+
+          {reviews.map((review) => {
+            const isExpanded = expandedReviewIds.has(review.reviewId);
+            const isLongContent = review.content.length > REVIEW_CONTENT_PREVIEW_LIMIT;
+            const isEditing = editingReviewId === review.reviewId;
+
+            return (
+              <div
+                key={review.reviewId}
+                className="flex flex-col gap-2 border-b border-gray-100 px-2 py-4 last:border-b-0"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-0.5">
+                      <Star
+                        size={14}
+                        color={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
+                        fill={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
+                      />
+                      <Star
+                        size={14}
+                        color={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
+                        fill={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
+                      />
+                      <Star
+                        size={14}
+                        color={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
+                        fill={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
+                      />
+                      <Star
+                        size={14}
+                        color={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
+                        fill={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
+                      />
+                      <Star
+                        size={14}
+                        color={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
+                        fill={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-[#212B36]">{review.nickname}</span>
+                  </div>
+                  {ownedReviewIds.has(review.reviewId) && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleEditReview(review)}
+                      className="text-xs text-gray-400 underline"
+                    >
+                      수정하기
+                    </button>
+                  )}
+                </div>
+
+                {isEditing ? (
+                  <div className="flex flex-col gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((score) => (
+                        <button
+                          key={score}
+                          type="button"
+                          onClick={() => setEditRating(score)}
+                          className="p-0.5"
+                        >
+                          <Star
+                            size={28}
+                            color={score <= editRating ? '#F5B000' : '#CDCDCD'}
+                            fill={score <= editRating ? '#F5B000' : '#CDCDCD'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="상품에 대한 리뷰를 남겨주세요."
+                      maxLength={REVIEW_CONTENT_MAX_LENGTH}
+                      className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateReview(review.reviewId)}
+                      disabled={isSubmittingEdit}
+                      className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
+                    >
+                      수정하기
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className={`text-sm text-[#212B36] ${isExpanded ? '' : 'line-clamp-3'}`}>
+                      {review.content}
+                    </p>
+
+                    {isLongContent && (
+                      <button
+                        type="button"
+                        onClick={() => toggleReviewExpand(review.reviewId)}
+                        className="self-start text-xs text-gray-400 underline"
+                      >
+                        {isExpanded ? '접기' : '더보기'}
+                      </button>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">도움돼요 {review.helpfulCount}</span>
+                      <button
+                        type="button"
+                        className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500"
+                      >
+                        도움돼요
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+
+          {reviewsPage < reviewsTotalPages && (
+            <button
+              type="button"
+              onClick={handleLoadMoreReviews}
+              disabled={reviewsLoading}
+              className="mx-2 my-3 rounded border border-gray-200 py-2 text-sm text-gray-500 disabled:opacity-50"
+            >
+              {reviewsLoading ? '불러오는 중...' : '리뷰 더보기'}
+            </button>
+          )}
+        </div>
       </div>
       {/* Bottom CTA */}
       <div className="fixed bottom-16 left-1/2 z-40 w-full max-w-120 -translate-x-1/2 bg-white px-3 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">

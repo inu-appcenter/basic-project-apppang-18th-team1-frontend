@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LeftArrow, UpArrow, Cross } from '@/components/icons';
 import {
   getCartList,
@@ -123,6 +123,7 @@ function CartPage() {
   const [summary, setSummary] = useState<CartListSummary>(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const hasAlertedRef = useRef(false);
 
   const allItems = shippingGroups.flatMap((group) => group.items);
   const isAllSelected = allItems.length > 0 && allItems.every((item) => item.isSelected);
@@ -142,8 +143,11 @@ function CartPage() {
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
-      alert('로그인이 필요한 기능입니다.');
-      navigate('/login');
+      if (!hasAlertedRef.current) {
+        hasAlertedRef.current = true;
+        alert('로그인이 필요한 기능입니다.');
+        navigate('/login');
+      }
       return undefined;
     }
 

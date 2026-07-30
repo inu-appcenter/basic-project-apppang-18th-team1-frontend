@@ -9,27 +9,6 @@ import {
 } from '@/api/product';
 import { addToCart } from '@/api/cart';
 
-// TODO: 배포된 API의 variants가 아직 전부 빈 배열이라 임시로 넣어둔 더미 데이터.
-// 백엔드가 실제 variants를 내려주면 이 상수와 아래 fallback 코드를 제거할 것.
-const DUMMY_VARIANTS: ProductVariant[] = [
-  {
-    variantId: 2001,
-    variantName: '옵션 1',
-    price: 12000,
-    shippingType: '로켓배송',
-    saveAmount: 3000,
-    isPopular: true,
-  },
-  {
-    variantId: 2002,
-    variantName: '옵션 2',
-    price: 12500,
-    shippingType: '새벽배송',
-    saveAmount: 2500,
-    isPopular: false,
-  },
-];
-
 function ProductDetailPage() {
   const navigate = useNavigate();
   const { productId } = useParams();

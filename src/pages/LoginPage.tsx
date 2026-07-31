@@ -13,6 +13,12 @@ function LoginPage() {
 
   const isActive = email.length > 0 && password.length > 0;
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && isActive) {
+      handleLogin();
+    }
+  }
+
   function handlePasswordLimit() {
     if (password.length > 0 && password.length < 8) {
       setPasswordError('비밀번호는 8자 이상이어야 합니다.');
@@ -62,6 +68,7 @@ function LoginPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="아이디(이메일)"
           className="text-body-1 flex-1 outline-none placeholder:text-gray-300"
         />
@@ -88,6 +95,7 @@ function LoginPage() {
             setPasswordError('');
           }}
           onBlur={handlePasswordLimit}
+          onKeyDown={handleKeyDown}
           placeholder="비밀번호"
           className="text-body-1 flex-1 outline-none placeholder:text-gray-300"
         />

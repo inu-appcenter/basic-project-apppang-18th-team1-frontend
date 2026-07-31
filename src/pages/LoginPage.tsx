@@ -136,18 +136,6 @@ function LoginPage() {
         회원가입
       </button>
 
-      {/* Business Row */}
-      <div className="flex w-full items-center justify-center gap-1">
-        <span className="text-xs font-semibold text-black">사업자이신가요?</span>
-        <button
-          type="button"
-          className="text-primary-200 flex items-center gap-1 text-xs font-semibold"
-        >
-          사업자 회원 가입하기
-          <RightArrow size={12} color="#346AFF" />
-        </button>
-      </div>
-
       {/* Toast - 로그인 실패 */}
       {loginError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">

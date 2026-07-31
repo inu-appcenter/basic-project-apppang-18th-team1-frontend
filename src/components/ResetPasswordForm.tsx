@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Letter, RoundFrameCross, Lock } from '@/components/icons';
 import { sendResetEmail, verifyResetCode } from '../api/supabase';
 import { resetPassword } from '@/api/auth';
@@ -41,8 +41,6 @@ function ResetPasswordForm() {
     try {
       const response = await verifyResetCode(email, verifyCode);
 
-      console.log('verify response', response.data);
-
       setSupabaseToken(response.data.access_token);
       setIsVerified(true);
 
@@ -59,12 +57,6 @@ function ResetPasswordForm() {
 
   const handleResetPassword = async () => {
     setError('');
-    console.log({
-      email,
-      newPassword,
-      passwordCheck,
-      supabaseToken,
-    });
 
     try {
       const response = await resetPassword({
@@ -85,10 +77,6 @@ function ResetPasswordForm() {
       setError(error.response.data.message);
     }
   };
-
-  useEffect(() => {
-    console.log('supabaseToken', supabaseToken);
-  }, [supabaseToken]);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3 pb-10">

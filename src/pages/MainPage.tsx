@@ -109,9 +109,8 @@ function MainPage() {
           className="flex w-full items-center gap-3 rounded-full border-2 border-black bg-white px-4 py-3"
           onClick={() => navigate('/search')}
         >
-          <Search size={16} className="shrink-0 text-black" />
+          <Search size={20} className="shrink-0 text-black" />
           <span className="text-body-3 flex-1 text-left text-gray-300">앱팡에서 검색하세요!</span>
-          <Camera size={24} className="shrink-0 text-black" />
         </button>
       </div>
 

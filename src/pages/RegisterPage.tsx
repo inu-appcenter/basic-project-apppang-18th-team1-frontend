@@ -15,6 +15,15 @@ import {
   Cross,
   IdCard,
 } from '@/components/icons';
+import AgreementModal from '@/components/AgreementModal';
+
+const TERMS_CONTENT: Record<number, string> = {
+  2: '쿠팡 이용약관 동의',
+  3: '전자금융거래 이용약관 동의',
+  4: '개인정보 수집 및 이용 동의',
+  5: '개인정보 제3자 제공 동의',
+  6: '마케팅 및 이벤트 목적의 개인정보 수집 및 이용동의',
+};
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -25,6 +34,7 @@ function RegisterPage() {
   const [agree4, setAgree4] = useState(false);
   const [agree5, setAgree5] = useState(false);
   const [agree6, setAgree6] = useState(false);
+  const [activeTermsId, setActiveTermsId] = useState<number | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -76,9 +86,10 @@ function RegisterPage() {
   function handlePasswordValidation(value: string) {
     const hasLetter = /[a-zA-Z]/.test(value);
     const hasNumber = /[0-9]/.test(value);
+    const hasSign = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
     if (!value) setPasswordError('비밀번호를 입력해주세요');
-    else if (value.length < 8 || !hasLetter || !hasNumber)
-      setPasswordError('비밀번호는 8자 이상, 영문+숫자 조합이여야합니다.');
+    else if (value.length < 8 || !hasLetter || !hasNumber || !hasSign)
+      setPasswordError('비밀번호는 8자 이상, 영문+숫자+특수문자 조합이여야합니다.');
     else setPasswordError('');
   }
 
@@ -394,7 +405,11 @@ function RegisterPage() {
           <label htmlFor="agree2" className="flex-1 text-sm font-bold">
             [필수] 쿠팡 이용약관 동의
           </label>
-          <button type="button" className="text-xs text-gray-400">
+          <button
+            type="button"
+            onClick={() => setActiveTermsId(2)}
+            className="text-xs text-gray-400"
+          >
             <RightArrow size={24} color="#7E7E7E" />
           </button>
         </div>
@@ -411,7 +426,11 @@ function RegisterPage() {
           <label htmlFor="agree3" className="flex-1 text-sm font-bold">
             [필수] 전자금융거래 이용약관 동의
           </label>
-          <button type="button" className="text-xs text-gray-400">
+          <button
+            type="button"
+            onClick={() => setActiveTermsId(3)}
+            className="text-xs text-gray-400"
+          >
             <RightArrow size={24} color="#7E7E7E" />
           </button>
         </div>
@@ -427,7 +446,11 @@ function RegisterPage() {
           <label htmlFor="agree4" className="flex-1 text-sm font-bold">
             [필수] 개인정보 수집 및 이용 동의
           </label>
-          <button type="button" className="text-xs text-gray-400">
+          <button
+            type="button"
+            onClick={() => setActiveTermsId(4)}
+            className="text-xs text-gray-400"
+          >
             <RightArrow size={24} color="#7E7E7E" />
           </button>
         </div>
@@ -443,7 +466,11 @@ function RegisterPage() {
           <label htmlFor="agree5" className="flex-1 text-sm font-bold">
             [필수] 개인정보 제3자 제공 동의
           </label>
-          <button type="button" className="text-xs text-gray-400">
+          <button
+            type="button"
+            onClick={() => setActiveTermsId(5)}
+            className="text-xs text-gray-400"
+          >
             <RightArrow size={24} color="#7E7E7E" />
           </button>
         </div>
@@ -459,7 +486,11 @@ function RegisterPage() {
           <label htmlFor="agree6" className="flex-1 text-sm font-bold">
             [선택] 마케팅 및 이벤트 목적의 개인정보 수집 및 이용동의
           </label>
-          <button type="button" className="text-xs text-gray-400">
+          <button
+            type="button"
+            onClick={() => setActiveTermsId(6)}
+            className="text-xs text-gray-400"
+          >
             <RightArrow size={24} color="#7E7E7E" />
           </button>
         </div>
@@ -481,6 +512,12 @@ function RegisterPage() {
           </button>
           <p className="flex-1 text-xs font-semibold">{registerError}</p>
         </div>
+      )}
+
+      {activeTermsId !== null && (
+        <AgreementModal title="약관 상세보기" onClose={() => setActiveTermsId(null)}>
+          {TERMS_CONTENT[activeTermsId]}
+        </AgreementModal>
       )}
     </div>
   );

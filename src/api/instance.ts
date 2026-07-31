@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const PUBLIC_URLS = ['/auth/login', '/auth/signup', '/auth/password/reset', '/auth/findEmail'];
+
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
@@ -10,8 +12,7 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use((config) => {
-  const publicUrls = ['/auth/login', '/auth/signup', '/auth/password/reset', '/auth/findEmail'];
-  if (config.url && publicUrls.includes(config.url)) {
+  if (config.url && PUBLIC_URLS.includes(config.url)) {
     return config;
   }
   const token = localStorage.getItem('accessToken');
@@ -25,7 +26,9 @@ instance.interceptors.response.use(
   (response) => response,
 
   async (error) => {
-    if (error.response?.status === 401) {
+    const isPublicUrl = error.config?.url && PUBLIC_URLS.includes(error.config.url);
+
+    if (error.response?.status === 401 && !isPublicUrl) {
       localStorage.removeItem('accessToken');
       window.location.href = '/login';
     }

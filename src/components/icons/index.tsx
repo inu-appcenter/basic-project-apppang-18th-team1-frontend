@@ -8,7 +8,7 @@ export { default as Letter } from './Letter';
 export { default as Lock } from './Lock';
 export { default as Person } from './Person';
 export { default as Phone } from './Phone';
-export { default as Camera } from './Camera';
+export { default as Search } from './Search';
 export { default as Share } from './Share';
 export { default as UpArrow } from './UpArrow';
 export { default as Human } from './Human';

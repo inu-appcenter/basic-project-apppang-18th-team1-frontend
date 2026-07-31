@@ -395,14 +395,7 @@ function ProductDetailPage() {
         </div>
       </div>
       {/* Product Information */}
-      <div className="flex flex-col gap-2 px-4 py-3">
-        <div className="flex justify-end">
-          <button type="button">
-            <Share size={24} color="#212B36" />
-          </button>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 px-2">
+      <div className="mt-2 flex items-center gap-2 px-2">
         {product.brand.brandLogoUrl ? (
           <img
             src={product.brand.brandLogoUrl}

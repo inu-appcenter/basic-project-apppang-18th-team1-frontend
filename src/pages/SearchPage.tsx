@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getAutocompleteSuggestions, getSearchInit } from '@/api/search';
 
+const RECENT_SEARCH_STORAGE_KEY = 'recentSearchKeywords';
+const MAX_RECENT_SEARCHES = 5;
+
+function getStoredRecentKeywords(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
 function highlightKeyword(text: string, keyword: string) {
   if (!keyword) return text;
   const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -25,9 +37,22 @@ function SearchPage() {
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [recommendKeywords, setRecommendKeywords] = useState<string[]>([]);
+  const [recentKeywords, setRecentKeywords] = useState<string[]>(() => getStoredRecentKeywords());
   const inputRef = useRef<HTMLInputElement>(null);
 
+  function addRecentKeyword(keyword: string) {
+    setRecentKeywords((prev) => {
+      const updated = [keyword, ...prev.filter((item) => item !== keyword)].slice(
+        0,
+        MAX_RECENT_SEARCHES,
+      );
+      localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }
+
   function goToSearchResult(keyword: string) {
+    addRecentKeyword(keyword);
     navigate(`/products?search=${encodeURIComponent(keyword)}`);
   }
 
@@ -132,6 +157,26 @@ function SearchPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {/* 최근 검색어 */}
+      {!searchValue.trim() && recentKeywords.length > 0 && (
+        <div className="flex w-full flex-col gap-2 px-2 py-3">
+          <p className="text-sm font-bold text-[#212B36]">최근 검색어</p>
+          <ul className="w-full">
+            {recentKeywords.map((keyword) => (
+              <li key={keyword}>
+                <button
+                  type="button"
+                  onClick={() => goToSearchResult(keyword)}
+                  className="w-full px-2 py-3 text-left text-sm transition-colors hover:bg-gray-200"
+                >
+                  {keyword}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* 검색 페이지 초기 화면: 쿠팡 추천 검색어 */}

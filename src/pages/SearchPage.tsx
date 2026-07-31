@@ -134,6 +134,7 @@ function SearchPage() {
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="검색어 입력"
+            maxLength={100}
             className="flex-1 bg-transparent px-4 text-sm outline-none placeholder:text-gray-400"
           />
           <button type="button" onClick={handleSearchClick} className="mr-4">

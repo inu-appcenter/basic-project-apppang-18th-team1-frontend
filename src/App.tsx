@@ -29,6 +29,7 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route path="/wishlist" element={<ProductListPage />} />
           <Route path="/mypage" element={<MyPage />} />
         </Route>
 

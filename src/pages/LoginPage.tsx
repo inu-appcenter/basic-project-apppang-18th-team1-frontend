@@ -8,7 +8,7 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
   const isActive = email.length > 0 && password.length > 0;
@@ -151,7 +151,7 @@ function LoginPage() {
       {/* Toast - 로그인 실패 */}
       {loginError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">
-          <button type="button" onClick={() => setLoginError(false)} className="shrink-0">
+          <button type="button" onClick={() => setLoginError('')} className="shrink-0">
             <Cross size={12} color="#CB1400" />
           </button>
           {loginError}

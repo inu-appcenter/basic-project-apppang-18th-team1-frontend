@@ -14,13 +14,9 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CATEGORY_LABELS } from '@/constants/category';
+import { getMainBanners, type MainBanner } from '@/api/banner';
 
 // ---- Types ----
-
-type Banner = {
-  id: number;
-  bgColor: string;
-};
 
 type Category = {
   id: number;
@@ -31,13 +27,7 @@ type Category = {
 
 // ---- Constants ----
 
-const BANNERS: Banner[] = [
-  { id: 1, bgColor: 'bg-secondary-100' },
-  { id: 2, bgColor: 'bg-primary-100' },
-  { id: 3, bgColor: 'bg-secondary-100' },
-  { id: 4, bgColor: 'bg-primary-100' },
-  { id: 5, bgColor: 'bg-secondary-100' },
-];
+const MAIN_BANNER_LIMIT = 3;
 
 const CATEGORY_ICONS: Record<string, ReactNode> = {
   '1': <Tag size={40} />,
@@ -63,25 +53,49 @@ function MainPage() {
   const navigate = useNavigate();
   const [currentBanner, setCurrentBanner] = useState(0);
   const touchStartX = useRef(0);
+  const [banners, setBanners] = useState<MainBanner[]>([]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchBanners = async () => {
+      try {
+        const response = await getMainBanners(MAIN_BANNER_LIMIT, controller.signal);
+        setBanners(response.data.data);
+        setCurrentBanner(0);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.error('메인 배너 조회 실패', err);
+      }
+    };
+
+    fetchBanners();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (banners.length <= 1) return undefined;
+
     const timer = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % BANNERS.length);
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    if (banners.length <= 1) return;
+
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
-        setCurrentBanner((prev) => (prev + 1) % BANNERS.length);
+        setCurrentBanner((prev) => (prev + 1) % banners.length);
       } else {
-        setCurrentBanner((prev) => (prev - 1 + BANNERS.length) % BANNERS.length);
+        setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
       }
     }
   };
@@ -113,26 +127,56 @@ function MainPage() {
           className="col-start-1 row-start-1 flex h-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${currentBanner * 100}%)` }}
         >
-          {BANNERS.map((banner) => (
-            <button
-              key={banner.id}
-              type="button"
-              className={`flex h-full min-w-full items-center justify-center ${banner.bgColor}`}
-              onClick={() => navigate('/products')}
-              aria-label={`배너 ${banner.id}`}
-            >
-              <span className="text-xl font-bold text-gray-300">배너 슬라이더</span>
-            </button>
-          ))}
+          {banners.length > 0 ? (
+            banners.map((banner) => (
+              <button
+                key={banner.rank}
+                type="button"
+                className="bg-secondary-100 flex h-full min-w-full items-center gap-4 px-5"
+                onClick={() => navigate(`/products/${banner.product.id}`)}
+                aria-label={`${banner.rank}위 ${banner.product.name}`}
+              >
+                <img
+                  src={banner.product.mainImageUrl}
+                  alt={banner.product.name}
+                  className="h-32 w-32 shrink-0 rounded object-cover"
+                />
+                <div className="flex flex-1 flex-col items-start gap-1 text-left">
+                  <span className="text-primary-200 text-xs font-bold">
+                    {banner.rank}위 인기상품
+                  </span>
+                  <span className="text-xs text-gray-500">{banner.product.brandName}</span>
+                  <span className="line-clamp-2 text-sm font-bold text-[#212B36]">
+                    {banner.product.name}
+                  </span>
+                  <span className="text-xs text-gray-400 line-through">
+                    {banner.product.originPrice.toLocaleString()}원
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {banner.product.discountRate > 0 && (
+                      <span className="text-sm font-bold text-red-300">
+                        {banner.product.discountRate}%
+                      </span>
+                    )}
+                    <span className="text-base font-bold text-red-300">
+                      {banner.product.salePrice.toLocaleString()}원
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="bg-secondary-100 h-full min-w-full" />
+          )}
         </div>
-        <div className="z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
-          {BANNERS.map((banner, index) => (
+        <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
+          {banners.map((banner, index) => (
             <button
-              key={banner.id}
+              key={banner.rank}
               type="button"
               aria-label={`배너 ${index + 1} 보기`}
               onClick={() => setCurrentBanner(index)}
-              className={`h-2 w-2 rounded-full transition-colors ${
+              className={`pointer-events-auto h-2 w-2 rounded-full transition-colors ${
                 index === currentBanner ? 'bg-black' : 'bg-gray-200'
               }`}
             />

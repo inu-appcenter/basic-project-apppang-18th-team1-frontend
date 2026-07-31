@@ -1,41 +1,41 @@
-import {
-  Human,
-  Gear,
-  Receipt,
-  FilledHeart,
-  ShoppingBag,
-  HandBag,
-  LayoutGrid,
-} from '@/components/icons';
+import { useEffect, useRef } from 'react';
+import { Human, Gear, Receipt, FilledHeart } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '@/api/auth';
 
 function MyPage() {
   const navigate = useNavigate();
+  const hasAlertedRef = useRef(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem('accessToken') && !hasAlertedRef.current) {
+      hasAlertedRef.current = true;
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('로그아웃 실패', err);
+    } finally {
+      localStorage.removeItem('accessToken');
+      navigate('/login');
+    }
+  };
+
   const menuItems = [
     {
       label: '주문내역',
-      path: '/orders',
+      path: '/order-list',
       icon: <Receipt size={24} color="#346AFF" />,
     },
     {
       label: '찜리스트',
       path: '/wishlist',
       icon: <FilledHeart size={24} color="#346AFF" />,
-    },
-    {
-      label: '최근본상품',
-      path: '/recent-products',
-      icon: <ShoppingBag size={24} color="#346AFF" />,
-    },
-    {
-      label: '자주산상품',
-      path: '/frequent-products',
-      icon: <HandBag size={24} color="#346AFF" />,
-    },
-    {
-      label: '전체메뉴',
-      path: '/all-menu',
-      icon: <LayoutGrid size={24} color="#346AFF" />,
     },
   ];
 
@@ -50,22 +50,30 @@ function MyPage() {
           <Gear size={24} color="#212B36" />
         </button>
       </header>
-      <div className="grid grid-cols-5 gap-2 px-8">
+      <div className="grid grid-cols-2 gap-2 px-8">
         {menuItems.map((item) => (
           <button
             key={item.path}
             type="button"
             onClick={() => navigate(item.path)}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center gap-1 py-2"
           >
             <div className="flex h-12 w-12 items-center justify-center text-gray-700">
               {item.icon}
             </div>
-            <span className="text-xs text-[#212B36]">{item.label}</span>
+            <span className="text-sm text-[#212B36]">{item.label}</span>
           </button>
         ))}
       </div>
       <div className="my-2 h-2 w-full bg-gray-100" />
+      <div className="border-t border-gray-100" />
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="px-4 py-3 text-center text-xs text-gray-400"
+      >
+        로그아웃
+      </button>
     </div>
   );
 }

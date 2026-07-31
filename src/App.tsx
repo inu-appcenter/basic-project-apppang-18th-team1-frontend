@@ -5,7 +5,6 @@ import CommonLayout from '@/layouts/CommonLayout';
 import CommonLayoutNoHeader from '@/layouts/CommonLayoutNoHeader';
 import CommonLayoutNoNavigationBar from '@/layouts/CommonLayoutNoNavigationBar';
 import CartPage from '@/pages/CartPage';
-import ChatbotPage from '@/pages/ChatbotPage';
 import LoginPage from '@/pages/LoginPage';
 import MainPage from '@/pages/MainPage';
 import MyPage from '@/pages/MyPage';
@@ -15,6 +14,8 @@ import ProductListPage from '@/pages/ProductListPage';
 import RegisterPage from '@/pages/RegisterPage';
 import SearchPage from '@/pages/SearchPage';
 import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
+import OrderPage from '@/pages/OrderPage';
+import OrderListPage from '@/pages/OrderListPage';
 
 function App() {
   return (
@@ -32,8 +33,9 @@ function App() {
         </Route>
 
         <Route element={<CommonLayoutNoNavigationBar />}>
-          <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/order" element={<OrderPage />} />
+          <Route path="/order-list" element={<OrderListPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>

@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { LeftArrow } from '@/components/icons';
 import { getProductList, type Product } from '@/api/product';
+import { searchProducts } from '@/api/search';
 import ProductCard from '@/components/ProductCard';
 import { CATEGORY_LABELS } from '@/constants/category';
 
@@ -15,6 +16,15 @@ const SORT_MAP: Record<
   최저가순: 'priceLow',
   최고가순: 'priceHigh',
 };
+const SEARCH_SORT_MAP: Record<
+  (typeof SORT_OPTIONS)[number],
+  'RANKING' | 'LATEST' | 'LOW_PRICE' | 'HIGH_PRICE'
+> = {
+  랭킹순: 'RANKING',
+  최신순: 'LATEST',
+  최저가순: 'LOW_PRICE',
+  최고가순: 'HIGH_PRICE',
+};
 
 function ProductListPage() {
   const navigate = useNavigate();
@@ -27,15 +37,16 @@ function ProductListPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const isLastPage = totalPages === 0 || page + 1 >= totalPages;
+  const [isLastPage, setIsLastPage] = useState(false);
   const pageTitle = categoryParam
     ? (CATEGORY_LABELS[categoryParam] ?? categoryParam)
     : searchKeyword;
+  // category가 있으면 카테고리 조회, 없고 검색어만 있으면 검색 API 사용
+  const isSearchMode = !categoryParam && searchKeyword.length > 0;
 
-  // 카테고리/정렬이 바뀌면 이전 page(예: 더보기로 늘어난 값)를 그대로 요청하지 않도록
+  // 카테고리/검색어/정렬이 바뀌면 이전 page(예: 더보기로 늘어난 값)를 그대로 요청하지 않도록
   // 같은 effect 안에서 필터 변경 여부를 확인해 요청 page를 0으로 맞춘다.
-  const filterKey = `${categoryParam ?? ''}::${selectedSort}`;
+  const filterKey = `${categoryParam ?? ''}::${searchKeyword}::${selectedSort}`;
   const prevFilterKeyRef = useRef(filterKey);
 
   useEffect(() => {
@@ -55,23 +66,49 @@ function ProductListPage() {
         setLoading(true);
         setError('');
 
-        const response = await getProductList(
-          {
-            category: categoryParam,
-            sort: SORT_MAP[selectedSort],
-            // TODO: 명세상 page는 0-indexed(기본값 0)인데, 실제 배포된 API는 page=0을 보내면
-            // 400("page는 0 이상이어야 합니다")을 반환하고 page=1을 보내야 첫 페이지가 옴.
-            // 백엔드가 내부적으로 1을 빼는 것으로 추정되어 +1 보정. 백엔드 수정되면 제거 필요.
-            page: page + 1,
-            size: 20,
-          },
-          controller.signal, // instance.get 두번째 인자로 signal 전달
-        );
+        if (isSearchMode) {
+          const response = await searchProducts(
+            {
+              keyword: searchKeyword,
+              sort: SEARCH_SORT_MAP[selectedSort],
+              page: page + 1, // 검색 API는 실제로 1부터 시작 (page=0은 400)
+              size: 20,
+            },
+            controller.signal,
+          );
 
-        const { products: newProducts, totalPages: newTotalPages } = response.data;
+          const { products: searchResults, isLastPage: lastPage } = response.data.data;
+          const mapped: Product[] = searchResults.map((item) => ({
+            id: item.productId,
+            brandName: '',
+            name: item.productName,
+            originPrice: item.originalPrice,
+            discountRate: item.discountRate,
+            salePrice: item.salePrice,
+            mainImageUrl: item.thumbnailUrl,
+          }));
 
-        setProducts((prev) => (page === 0 ? newProducts : [...prev, ...newProducts]));
-        setTotalPages(newTotalPages);
+          setProducts((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
+          setIsLastPage(lastPage);
+        } else {
+          const response = await getProductList(
+            {
+              category: categoryParam,
+              sort: SORT_MAP[selectedSort],
+              // TODO: 명세상 page는 0-indexed(기본값 0)인데, 실제 배포된 API는 page=0을 보내면
+              // 400("page는 0 이상이어야 합니다")을 반환하고 page=1을 보내야 첫 페이지가 옴.
+              // 백엔드가 내부적으로 1을 빼는 것으로 추정되어 +1 보정. 백엔드 수정되면 제거 필요.
+              page: page + 1,
+              size: 20,
+            },
+            controller.signal, // instance.get 두번째 인자로 signal 전달
+          );
+
+          const { products: newProducts, totalPages: newTotalPages } = response.data;
+
+          setProducts((prev) => (page === 0 ? newProducts : [...prev, ...newProducts]));
+          setIsLastPage(newTotalPages === 0 || page + 1 >= newTotalPages);
+        }
       } catch (err) {
         if (controller.signal.aborted) return; // 취소된 요청은 무시
         console.error('에러 발생', err);
@@ -84,7 +121,7 @@ function ProductListPage() {
     fetchProducts();
 
     return () => controller.abort(); // 클린업 시 이전 요청 취소
-  }, [filterKey, page, categoryParam, selectedSort]);
+  }, [filterKey, page, categoryParam, selectedSort, searchKeyword, isSearchMode]);
 
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">

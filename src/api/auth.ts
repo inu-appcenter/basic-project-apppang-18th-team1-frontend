@@ -25,6 +25,10 @@ export const refresh = () => {
   return instance.post('/auth/refresh');
 };
 
+export const logout = () => {
+  return instance.post('/auth/logout');
+};
+
 export interface FindEmailRequest {
   name: string;
   phoneNumber: string;

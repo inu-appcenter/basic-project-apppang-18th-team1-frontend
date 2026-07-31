@@ -77,3 +77,12 @@ export const toggleWishlist = (productId: string | number, signal?: AbortSignal)
     signal,
   });
 };
+
+export interface WishlistResponse {
+  message: string;
+  data: Product[];
+}
+
+export const getWishlist = (signal?: AbortSignal) => {
+  return instance.get<WishlistResponse>('/products/wishlist', { signal });
+};

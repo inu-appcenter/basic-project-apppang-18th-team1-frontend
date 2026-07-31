@@ -16,6 +16,7 @@ import SearchPage from '@/pages/SearchPage';
 import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
 import OrderPage from '@/pages/OrderPage';
 import OrderListPage from '@/pages/OrderListPage';
+import ProfilePage from '@/pages/ProfilePage';
 
 function App() {
   return (
@@ -29,7 +30,9 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route path="/wishlist" element={<ProductListPage />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         <Route element={<CommonLayoutNoNavigationBar />}>

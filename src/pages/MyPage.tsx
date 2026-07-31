@@ -1,18 +1,38 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Human, Gear, Receipt, FilledHeart } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '@/api/auth';
+import { logout, getMyProfile } from '@/api/auth';
 
 function MyPage() {
   const navigate = useNavigate();
   const hasAlertedRef = useRef(false);
+  const [nickname, setNickname] = useState('');
 
   useEffect(() => {
-    if (!localStorage.getItem('accessToken') && !hasAlertedRef.current) {
-      hasAlertedRef.current = true;
-      alert('로그인이 필요한 기능입니다.');
-      navigate('/login');
+    if (!localStorage.getItem('accessToken')) {
+      if (!hasAlertedRef.current) {
+        hasAlertedRef.current = true;
+        alert('로그인이 필요한 기능입니다.');
+        navigate('/login');
+      }
+      return undefined;
     }
+
+    const controller = new AbortController();
+
+    const fetchProfile = async () => {
+      try {
+        const response = await getMyProfile(controller.signal);
+        setNickname(response.data.nickname);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.error('회원 정보 조회 실패', err);
+      }
+    };
+
+    fetchProfile();
+
+    return () => controller.abort();
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -44,9 +64,9 @@ function MyPage() {
       <header className="bg-primary-100 flex h-[72px] w-full items-center justify-between px-4 py-5">
         <div className="flex items-center gap-1">
           <Human size={24} color="#212B36" />
-          <span className="text-lg font-bold">홍길동</span>
+          <span className="text-lg font-bold">{nickname}</span>
         </div>
-        <button type="button">
+        <button type="button" onClick={() => navigate('/profile')}>
           <Gear size={24} color="#212B36" />
         </button>
       </header>

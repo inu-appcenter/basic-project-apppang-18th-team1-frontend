@@ -1,5 +1,3 @@
-// TODO: 백엔드가 카테고리를 문자열(fashion, computer...)이 아닌 숫자 id로 관리해서 임시로 id 기반 매핑 사용 중.
-// 실제 카테고리 체계가 정해지면 id ↔ 라벨 매핑을 다시 확인해야 함.
 export const CATEGORY_LABELS: Record<string, string> = {
   '1': '패션/잡화',
   '2': '컴퓨터',

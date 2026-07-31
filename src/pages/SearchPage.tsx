@@ -1,21 +1,91 @@
 import { LeftArrow, Camera } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { getAutocompleteSuggestions, getSearchInit } from '@/api/search';
+
+function highlightKeyword(text: string, keyword: string) {
+  if (!keyword) return text;
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === keyword.toLowerCase() ? (
+      // eslint-disable-next-line react/no-array-index-key
+      <span key={index} className="font-bold">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
 
 function SearchPage() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [recommendKeywords, setRecommendKeywords] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  function goToSearchResult(keyword: string) {
+    navigate(`/products?search=${encodeURIComponent(keyword)}`);
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && searchValue.trim()) {
-      navigate(`/products?search=${searchValue}`);
+    const trimmed = searchValue.trim();
+    if (e.key === 'Enter' && trimmed) {
+      goToSearchResult(trimmed);
     }
   }
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // 검색 페이지 진입 시 추천 검색어 조회
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchRecommendKeywords = async () => {
+      try {
+        const response = await getSearchInit(controller.signal);
+        setRecommendKeywords(response.data.recommendKeywords);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.error('추천 검색어 조회 실패', err);
+      }
+    };
+
+    fetchRecommendKeywords();
+
+    return () => controller.abort();
+  }, []);
+
+  // 검색어 입력 중 자동완성 (300ms debounce, 1자 이상일 때만 조회)
+  useEffect(() => {
+    const trimmed = searchValue.trim();
+    if (!trimmed) {
+      setSuggestions([]);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const response = await getAutocompleteSuggestions(trimmed, controller.signal);
+        setSuggestions(response.data.suggestions);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.error('자동완성 조회 실패', err);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchValue]);
+
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3">
       {/* Header */}
@@ -39,6 +109,42 @@ function SearchPage() {
           </button>
         </div>
       </header>
+
+      {/* 자동완성 추천 검색어 */}
+      {searchValue.trim() && suggestions.length > 0 && (
+        <ul className="w-full divide-y divide-gray-200">
+          {suggestions.map((suggestion) => (
+            <li key={suggestion}>
+              <button
+                type="button"
+                onClick={() => goToSearchResult(suggestion)}
+                className="w-full px-2 py-3 text-left text-sm"
+              >
+                {highlightKeyword(suggestion, searchValue.trim())}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* 검색 페이지 초기 화면: 쿠팡 추천 검색어 */}
+      {!searchValue.trim() && recommendKeywords.length > 0 && (
+        <div className="flex w-full flex-col gap-2 px-2 py-3">
+          <p className="text-sm font-bold text-[#212B36]">쿠팡 추천 검색어</p>
+          <div className="flex flex-wrap gap-2">
+            {recommendKeywords.map((keyword) => (
+              <button
+                key={keyword}
+                type="button"
+                onClick={() => goToSearchResult(keyword)}
+                className="rounded-full border border-gray-200 px-4 py-1.5 text-sm whitespace-nowrap"
+              >
+                {keyword}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

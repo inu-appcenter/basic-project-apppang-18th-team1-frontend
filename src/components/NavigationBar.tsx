@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Bot, Home, Search, ShoppingCart, User } from 'lucide-react'
+import { Home, Search, ShoppingCart, User } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 type NavItem = {
@@ -11,7 +11,6 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: '홈', path: '/', icon: <Home size={24} /> },
   { label: '검색', path: '/search', icon: <Search size={24} /> },
-  { label: '챗봇', path: '/chatbot', icon: <Bot size={24} /> },
   { label: '장바구니', path: '/cart', icon: <ShoppingCart size={24} /> },
   { label: '마이페이지', path: '/mypage', icon: <User size={24} /> },
 ]

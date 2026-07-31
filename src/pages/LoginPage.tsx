@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RightArrow, Cross, RoundFrameCross, EyeOpen, EyeClose } from '@/components/icons';
+import { login } from '@/api/auth';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -19,6 +20,28 @@ function LoginPage() {
       setPasswordError('');
     }
   }
+
+  const handleLogin = async () => {
+    try {
+      const response = await login({
+        email,
+        password,
+      });
+
+      localStorage.setItem('accessToken', response.data.accessToken);
+
+      alert(response.data.message);
+
+      navigate('/');
+    } catch (error: any) {
+      if (!error.response) {
+        setLoginError('서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      setLoginError(error.response.data.message);
+    }
+  };
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center gap-3 bg-white px-3">
       {/* Header */}
@@ -81,7 +104,7 @@ function LoginPage() {
       <button
         type="button"
         disabled={!isActive}
-        onClick={() => setLoginError(true)}
+        onClick={handleLogin}
         className={`flex w-full items-center justify-center py-3 text-base font-bold text-white transition-colors ${
           isActive ? 'bg-primary-200' : 'bg-gray-200'
         }`}
@@ -93,6 +116,7 @@ function LoginPage() {
       <div className="flex w-full justify-end">
         <button
           type="button"
+          onClick={() => navigate('/account-recovery')}
           className="text-primary-200 flex items-center gap-1 text-xs font-semibold"
         >
           아이디·비밀번호 찾기
@@ -128,13 +152,9 @@ function LoginPage() {
       {loginError && (
         <div className="absolute top-[57px] left-[95px] flex w-[200px] items-center gap-2 rounded bg-white px-3 py-2 shadow-[4px_4px_12px_0px_rgba(0,0,0,0.25)]">
           <button type="button" onClick={() => setLoginError(false)} className="shrink-0">
-            <Cross size={12} color="#7E7E7E" />
+            <Cross size={12} color="#CB1400" />
           </button>
-          <p className="flex-1 text-xs font-semibold">
-            아이디 또는 비밀번호가
-            <br />
-            일치하지 않습니다
-          </p>
+          {loginError}
         </div>
       )}
       {passwordError && <p className="w-full text-xs text-red-500">{passwordError}</p>}

@@ -45,6 +45,7 @@ function ProductListPage() {
     : categoryParam
       ? (CATEGORY_LABELS[categoryParam] ?? categoryParam)
       : searchKeyword;
+  const displayedPageTitle = pageTitle.length > 20 ? `${pageTitle.slice(0, 20)}...` : pageTitle;
   // category가 있으면 카테고리 조회, 없고 검색어만 있으면 검색 API 사용
   const isSearchMode = !isWishlistMode && !categoryParam && searchKeyword.length > 0;
 
@@ -148,7 +149,7 @@ function ProductListPage() {
         <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
           <LeftArrow size={24} color="#212B36" />
         </button>
-        <h1 className="text-[20px] leading-none font-bold">{pageTitle}</h1>
+        <h1 className="text-[20px] leading-none font-bold">{displayedPageTitle}</h1>
       </header>
 
       {/* Sort Dropdown */}

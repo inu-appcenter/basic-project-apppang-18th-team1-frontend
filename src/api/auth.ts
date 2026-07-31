@@ -29,6 +29,18 @@ export const logout = () => {
   return instance.post('/auth/logout');
 };
 
+export interface MyProfileResponse {
+  name: string;
+  nickname: string;
+  email: string;
+  phoneNumber: string;
+  message: string;
+}
+
+export const getMyProfile = (signal?: AbortSignal) => {
+  return instance.get<MyProfileResponse>('/auth/me', { signal });
+};
+
 export interface FindEmailRequest {
   name: string;
   phoneNumber: string;

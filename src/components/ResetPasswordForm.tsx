@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Letter, RoundFrameCross, Lock } from '@/components/icons';
+import { Letter, RoundFrameCross, Lock, EyeOpen, EyeClose } from '@/components/icons';
 import { sendResetEmail, verifyResetCode } from '../api/supabase';
 import { resetPassword } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +9,13 @@ function ResetPasswordForm() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [showVerifyInput, setShowVerifyInput] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [supabaseToken, setSupabaseToken] = useState('');
   const [isVerified, setIsVerified] = useState(false);
 
@@ -23,6 +27,7 @@ function ResetPasswordForm() {
 
   const handleSendEmail = async () => {
     setError('');
+    setIsSendingEmail(true);
     try {
       await sendResetEmail(email);
       setShowVerifyInput(true);
@@ -32,6 +37,8 @@ function ResetPasswordForm() {
         return;
       }
       setError(error.response.data.msg);
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -57,6 +64,7 @@ function ResetPasswordForm() {
 
   const handleResetPassword = async () => {
     setError('');
+    setPasswordError('');
 
     try {
       const response = await resetPassword({
@@ -71,6 +79,11 @@ function ResetPasswordForm() {
     } catch (error: any) {
       if (!error.response) {
         setError('서버와 연결할 수 없습니다.');
+        return;
+      }
+
+      if (error.response.status === 400) {
+        setPasswordError('비밀번호는 8자 이상, 영문+숫자+특수문자 조합이여야합니다.');
         return;
       }
 
@@ -96,9 +109,10 @@ function ResetPasswordForm() {
               setEmail(e.target.value);
             }}
             placeholder="아이디(이메일)"
-            className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
+            disabled={isVerified}
+            className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300 disabled:bg-gray-50 disabled:text-gray-400"
           />
-          {email && (
+          {email && !isVerified && (
             <button
               type="button"
               onClick={() => setEmail('')}
@@ -112,10 +126,10 @@ function ResetPasswordForm() {
         <button
           type="button"
           onClick={handleSendEmail}
-          disabled={!email.trim()}
+          disabled={!email.trim() || isSendingEmail || isVerified}
           className="bg-primary-200 h-12 rounded px-4 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300"
         >
-          인증하기
+          {isSendingEmail ? '보내는 중' : '인증하기'}
         </button>
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
@@ -130,7 +144,8 @@ function ResetPasswordForm() {
               value={verifyCode}
               onChange={(e) => setVerifyCode(e.target.value)}
               placeholder="인증번호 입력"
-              className="flex-1 px-3 text-sm font-bold outline-none"
+              disabled={isVerified}
+              className="flex-1 px-3 text-sm font-bold outline-none disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
 
@@ -154,12 +169,26 @@ function ResetPasswordForm() {
           <Lock size={20} color="#7E7E7E" />
         </div>
         <input
-          type="password"
+          type={showPassword1 ? 'text' : 'password'}
           placeholder="새 비밀번호"
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
           value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
+          onChange={(e) => {
+            setNewPassword(e.target.value);
+            setPasswordError('');
+          }}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword1((prev) => !prev)}
+          className="mr-3 shrink-0"
+        >
+          {showPassword1 ? (
+            <EyeOpen size={20} color="#7E7E7E" />
+          ) : (
+            <EyeClose size={20} color="#7E7E7E" />
+          )}
+        </button>
       </div>
       <div
         className={
@@ -170,13 +199,28 @@ function ResetPasswordForm() {
           <Lock size={20} color="#7E7E7E" />
         </div>
         <input
-          type="password"
+          type={showPassword2 ? 'text' : 'password'}
           value={passwordCheck}
-          onChange={(e) => setPasswordCheck(e.target.value)}
+          onChange={(e) => {
+            setPasswordCheck(e.target.value);
+            setPasswordError('');
+          }}
           placeholder="새 비밀번호 확인"
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword2((prev) => !prev)}
+          className="mr-3 shrink-0"
+        >
+          {showPassword2 ? (
+            <EyeOpen size={20} color="#7E7E7E" />
+          ) : (
+            <EyeClose size={20} color="#7E7E7E" />
+          )}
+        </button>
       </div>
+      {passwordError && <p className="w-full text-xs text-red-500">{passwordError}</p>}
       <button
         type="button"
         disabled={!isActive}

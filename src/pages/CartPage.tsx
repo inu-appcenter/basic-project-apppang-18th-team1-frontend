@@ -310,6 +310,12 @@ function CartPage() {
 
         {error && <div className="w-full py-10 text-center text-sm text-red-400">{error}</div>}
 
+        {!loading && !error && allItems.length === 0 && (
+          <div className="w-full py-10 text-center text-sm text-gray-400">
+            장바구니에 담긴 상품이 없습니다.
+          </div>
+        )}
+
         {!loading &&
           !error &&
           shippingGroups.map((group) =>

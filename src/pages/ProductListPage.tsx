@@ -188,6 +188,12 @@ function ProductListPage() {
         <div className="w-full py-10 text-center text-sm text-gray-400">찜한 상품이 없습니다.</div>
       )}
 
+      {!loading && !error && isSearchMode && products.length === 0 && (
+        <div className="w-full py-10 text-center text-sm text-gray-400">
+          해당 상품이 존재하지 않습니다.
+        </div>
+      )}
+
       {!error && (
         <div className="w-full">
           {products.map((product) => (

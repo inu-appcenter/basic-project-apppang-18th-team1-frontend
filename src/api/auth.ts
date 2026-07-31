@@ -58,5 +58,5 @@ export interface ResetPasswordRequest {
 }
 
 export const resetPassword = (data: ResetPasswordRequest) => {
-  return instance.post('/auth/password/reset', data);
+  return instance.patch('/auth/password/reset', data);
 };

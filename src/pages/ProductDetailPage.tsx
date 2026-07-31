@@ -1,12 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LeftArrow, FilledHeart, EmptyHeart, Share, Pencil, Star } from '@/components/icons';
-import {
-  getProductDetail,
-  toggleWishlist,
-  type ProductDetail,
-  type ProductVariant,
-} from '@/api/product';
+import { getProductDetail, toggleWishlist, type ProductDetail } from '@/api/product';
 import { addToCart } from '@/api/cart';
 import {
   createReview,
@@ -126,13 +121,13 @@ function ProductDetailPage() {
         setError('');
 
         const response = await getProductDetail(productId, controller.signal);
-        const variants =
-          response.data.variants.length > 0 ? response.data.variants : DUMMY_VARIANTS;
 
-        setProduct({ ...response.data, variants });
+        setProduct(response.data);
         setIsWished(response.data.isWishlist);
         setCurrentImage(0);
-        setSelectedVariantId(variants.find((variant) => variant.isPopular)?.variantId ?? null);
+        setSelectedVariantId(
+          response.data.variants.find((variant) => variant.isPopular)?.variantId ?? null,
+        );
         setQuantity(1);
       } catch (err) {
         if (controller.signal.aborted) return;

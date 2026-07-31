@@ -1,4 +1,4 @@
-import { LeftArrow, Camera } from '@/components/icons';
+import { LeftArrow, Search } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getAutocompleteSuggestions, getSearchInit } from '@/api/search';
@@ -34,6 +34,13 @@ function SearchPage() {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     const trimmed = searchValue.trim();
     if (e.key === 'Enter' && trimmed) {
+      goToSearchResult(trimmed);
+    }
+  }
+
+  function handleSearchClick() {
+    const trimmed = searchValue.trim();
+    if (trimmed) {
       goToSearchResult(trimmed);
     }
   }
@@ -104,8 +111,8 @@ function SearchPage() {
             placeholder="검색어 입력"
             className="flex-1 bg-transparent px-4 text-sm outline-none placeholder:text-gray-400"
           />
-          <button type="button" className="mr-4">
-            <Camera size={24} color="#212B36" />
+          <button type="button" onClick={handleSearchClick} className="mr-4">
+            <Search size={20} color="#212B36" />
           </button>
         </div>
       </header>

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { LeftArrow, FilledHeart, EmptyHeart, Share, Pencil, Star } from '@/components/icons';
 import { getProductDetail, toggleWishlist, type ProductDetail } from '@/api/product';
 import { addToCart } from '@/api/cart';
+import { buyNow } from '@/api/order';
 import {
   createReview,
   getReviews,
@@ -27,6 +28,7 @@ function ProductDetailPage() {
   const [error, setError] = useState('');
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [showBuyNowConfirm, setShowBuyNowConfirm] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewContent, setReviewContent] = useState('');
@@ -189,6 +191,45 @@ function ProductDetailPage() {
       alert(response.data.message);
     } catch (err) {
       console.error('장바구니 담기 실패', err);
+    }
+  };
+
+  const handleBuyNowClick = () => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedVariantId) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
+
+    setShowBuyNowConfirm(true);
+  };
+
+  const handleConfirmBuyNow = async () => {
+    if (!productId || !selectedVariantId) return;
+
+    setShowBuyNowConfirm(false);
+
+    try {
+      const response = await buyNow({
+        productId: Number(productId),
+        optionId: selectedVariantId,
+        quantity,
+      });
+      navigate('/order', { state: { order: response.data.data } });
+    } catch (err: any) {
+      console.error('바로구매 실패', err);
+      if (!err.response) {
+        alert('서버와 연결할 수 없습니다.');
+        return;
+      }
+      alert(err.response.data.message);
     }
   };
 
@@ -742,11 +783,52 @@ function ProductDetailPage() {
           >
             장바구니 담기
           </button>
-          <button className="bg-primary-200 flex-1 rounded py-3 font-bold text-white">
+          <button
+            type="button"
+            onClick={handleBuyNowClick}
+            className="bg-primary-200 flex-1 rounded py-3 font-bold text-white"
+          >
             바로구매
           </button>
         </div>
       </div>
+
+      {showBuyNowConfirm && product && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-6"
+          onClick={() => setShowBuyNowConfirm(false)}
+        >
+          <div
+            className="w-full max-w-80 rounded-lg bg-white p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-center text-sm font-bold text-[#212B36]">
+              {product.productName}
+            </p>
+            <p className="mb-5 text-center text-xs text-gray-500">
+              {selectedVariant?.variantName} / {quantity}개
+              <br />
+              상품을 구매하시겠습니까?
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowBuyNowConfirm(false)}
+                className="flex-1 rounded border border-gray-300 py-2 text-sm font-semibold text-[#212B36]"
+              >
+                아니오
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBuyNow}
+                className="bg-primary-200 flex-1 rounded py-2 text-sm font-semibold text-white"
+              >
+                예
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

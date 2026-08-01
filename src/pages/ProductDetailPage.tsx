@@ -9,6 +9,7 @@ import {
   getReviews,
   updateReview,
   getReviewOwnership,
+  toggleReviewHelpful,
   type ReviewListItem,
 } from '@/api/review';
 
@@ -335,6 +336,33 @@ function ProductDetailPage() {
     }
   };
 
+  const handleToggleHelpful = async (review: ReviewListItem) => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await toggleReviewHelpful(productId, review.reviewId);
+      const { isHelpful, helpfulCount } = response.data;
+      setReviews((prev) =>
+        prev.map((item) =>
+          item.reviewId === review.reviewId ? { ...item, isHelpful, helpfulCount } : item,
+        ),
+      );
+    } catch (err: any) {
+      console.error('도움돼요 처리 실패', err);
+      if (!err.response) {
+        alert('서버와 연결할 수 없습니다.');
+        return;
+      }
+      alert(err.response.data.message);
+    }
+  };
+
   const handleSwipeEnd = (endX: number) => {
     if (images.length <= 1) return;
     const diff = touchStartX.current - endX;
@@ -476,7 +504,13 @@ function ProductDetailPage() {
               </span>
               <span className="text-[14px] font-bold text-[#212B36]">&gt;</span>
             </div>
-            <button type="button" className="text-left text-[12px] text-gray-300">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/products?search=${encodeURIComponent(product.brand.brandName)}`)
+              }
+              className="text-left text-[12px] text-gray-300"
+            >
               브랜드 상품 모아보기
             </button>
           </div>
@@ -528,10 +562,10 @@ function ProductDetailPage() {
             {selectedVariant && (
               <div className="flex flex-wrap items-center gap-2 px-1">
                 <span className="text-lg font-bold text-red-300">
-                  {(product.salePrice + selectedVariant.price).toLocaleString()}원
+                  {((product.salePrice + selectedVariant.price) * quantity).toLocaleString()}원
                 </span>
                 <span className="text-sm text-gray-500">
-                  {selectedVariant.saveAmount.toLocaleString()}원 할인
+                  {(selectedVariant.saveAmount * quantity).toLocaleString()}원 할인
                 </span>
                 <span className="text-sm text-gray-500">{selectedVariant.shippingType}</span>
 
@@ -749,7 +783,9 @@ function ProductDetailPage() {
                         </span>
                         <button
                           type="button"
-                          className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500"
+                          onClick={() => handleToggleHelpful(review)}
+                          disabled={review.isHelpful}
+                          className="border-primary-200 text-primary-200 rounded border px-2 py-1 text-xs font-semibold disabled:border-gray-200 disabled:text-gray-400"
                         >
                           도움돼요
                         </button>

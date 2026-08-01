@@ -102,9 +102,11 @@ function OrderListPage() {
             </div>
 
             {order.items.map((item) => (
-              <div
+              <button
                 key={item.productId}
-                className="flex gap-3 border-b border-gray-100 py-3 last:border-b-0"
+                type="button"
+                onClick={() => navigate(`/products/${item.productId}`)}
+                className="flex w-full gap-3 border-b border-gray-100 py-3 text-left last:border-b-0"
               >
                 <img
                   src={item.thumbnailUrl}
@@ -118,7 +120,7 @@ function OrderListPage() {
                   <p className="text-xs text-gray-500">수량 {item.quantity}개</p>
                   <p className="text-sm font-bold">{item.price.toLocaleString()}원</p>
                 </div>
-              </div>
+              </button>
             ))}
 
             <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-3">

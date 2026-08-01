@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Human, Gear, Receipt, FilledHeart } from '@/components/icons';
+import { Human, Gear, Receipt, FilledHeart, MapPin } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { logout, getMyProfile } from '@/api/auth';
 
@@ -79,6 +79,11 @@ function MyPage() {
       path: '/wishlist',
       icon: <FilledHeart size={24} color="#346AFF" />,
     },
+    {
+      label: '내 배송지',
+      path: '/addresses',
+      icon: <MapPin size={24} color="#346AFF" />,
+    },
   ];
 
   if (!isLoggedIn) {
@@ -96,7 +101,7 @@ function MyPage() {
           <Gear size={24} color="#212B36" />
         </button>
       </header>
-      <div className="grid grid-cols-2 gap-2 px-8">
+      <div className="grid grid-cols-3 gap-2 px-8">
         {menuItems.map((item) => (
           <button
             key={item.path}

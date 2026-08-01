@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LeftArrow } from '@/components/icons';
+import { Cross } from '@/components/icons';
 import type { OrderData } from '@/api/order';
 
 function OrderPage() {
@@ -19,11 +19,11 @@ function OrderPage() {
   return (
     <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">
       {/* Header */}
-      <header className="flex h-[72px] w-full items-center justify-center py-5">
-        <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
-          <LeftArrow size={24} color="#212B36" />
-        </button>
+      <header className="relative flex h-[72px] w-full items-center justify-center py-5">
         <h1 className="text-[20px] leading-none font-bold">구매하기</h1>
+        <button type="button" onClick={() => navigate('/')} className="absolute right-3 p-1">
+          <Cross size={24} color="#7E7E7E" />
+        </button>
       </header>
 
       <div className="w-full">

@@ -1,10 +1,11 @@
 import { LeftArrow, Search, Cross } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { getAutocompleteSuggestions, getSearchInit } from '@/api/search';
+import { getAutocompleteSuggestions } from '@/api/search';
 
 const RECENT_SEARCH_STORAGE_KEY = 'recentSearchKeywords';
 const MAX_RECENT_SEARCHES = 5;
+const RECOMMENDED_KEYWORDS = ['갤럭시', 'apple', 'LG', '삼성', 'Logitech'];
 
 function getStoredRecentKeywords(): string[] {
   try {
@@ -36,7 +37,6 @@ function SearchPage() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [recommendKeywords, setRecommendKeywords] = useState<string[]>([]);
   const [recentKeywords, setRecentKeywords] = useState<string[]>(() => getStoredRecentKeywords());
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,25 +85,6 @@ function SearchPage() {
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
-
-  // 검색 페이지 진입 시 추천 검색어 조회
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchRecommendKeywords = async () => {
-      try {
-        const response = await getSearchInit(controller.signal);
-        setRecommendKeywords(response.data.recommendKeywords);
-      } catch (err) {
-        if (controller.signal.aborted) return;
-        console.error('추천 검색어 조회 실패', err);
-      }
-    };
-
-    fetchRecommendKeywords();
-
-    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -213,12 +194,12 @@ function SearchPage() {
         </div>
       )}
 
-      {/* 검색 페이지 초기 화면: 쿠팡 추천 검색어 */}
-      {!searchValue.trim() && recommendKeywords.length > 0 && (
+      {/* 추천 검색어 */}
+      {!searchValue.trim() && (
         <div className="flex w-full flex-col gap-2 px-2 py-3">
-          <p className="text-sm font-bold text-[#212B36]">쿠팡 추천 검색어</p>
+          <p className="text-sm font-bold text-[#212B36]">추천 검색어</p>
           <div className="flex flex-wrap gap-2">
-            {recommendKeywords.map((keyword) => (
+            {RECOMMENDED_KEYWORDS.map((keyword) => (
               <button
                 key={keyword}
                 type="button"

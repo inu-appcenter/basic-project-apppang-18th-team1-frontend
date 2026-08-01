@@ -60,9 +60,6 @@ export interface ProductDetail {
   detailImages: string[];
 }
 
-// TODO: 명세는 { message, data: {...} } 형태지만 실제 배포된 API는 message/data 래핑 없이
-// ProductDetail 필드가 최상위로 바로 온다(상품 리스트 API와 동일한 패턴). 백엔드가 명세대로
-// 수정되면 response.data.data 형태로 다시 바꿔야 함.
 export const getProductDetail = (productId: string | number, signal?: AbortSignal) => {
   return instance.get<ProductDetail>(`/products/${productId}`, { signal });
 };

@@ -1,4 +1,4 @@
-import { LeftArrow, Search } from '@/components/icons';
+import { LeftArrow, Search, Cross } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getAutocompleteSuggestions, getSearchInit } from '@/api/search';
@@ -49,6 +49,19 @@ function SearchPage() {
       localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
+  }
+
+  function deleteRecentKeyword(keyword: string) {
+    setRecentKeywords((prev) => {
+      const updated = prev.filter((item) => item !== keyword);
+      localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }
+
+  function clearRecentKeywords() {
+    setRecentKeywords([]);
+    localStorage.removeItem(RECENT_SEARCH_STORAGE_KEY);
   }
 
   function goToSearchResult(keyword: string) {
@@ -161,22 +174,43 @@ function SearchPage() {
       )}
 
       {/* 최근 검색어 */}
-      {!searchValue.trim() && recentKeywords.length > 0 && (
+      {!searchValue.trim() && (
         <div className="flex w-full flex-col gap-2 px-2 py-3">
-          <p className="text-sm font-bold text-[#212B36]">최근 검색어</p>
-          <ul className="w-full">
-            {recentKeywords.map((keyword) => (
-              <li key={keyword}>
-                <button
-                  type="button"
-                  onClick={() => goToSearchResult(keyword)}
-                  className="w-full px-2 py-3 text-left text-sm transition-colors hover:bg-gray-200"
+          <div className="flex w-full items-center justify-between">
+            <p className="text-sm font-bold text-[#212B36]">최근 검색어</p>
+            {recentKeywords.length > 0 && (
+              <button type="button" onClick={clearRecentKeywords} className="text-xs text-gray-400">
+                전체삭제
+              </button>
+            )}
+          </div>
+          {recentKeywords.length === 0 ? (
+            <p className="w-full py-3 text-center text-sm text-gray-400">최근 검색어가 없습니다</p>
+          ) : (
+            <ul className="w-full">
+              {recentKeywords.map((keyword) => (
+                <li
+                  key={keyword}
+                  className="flex w-full items-center justify-between transition-colors hover:bg-gray-200"
                 >
-                  {keyword}
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <button
+                    type="button"
+                    onClick={() => goToSearchResult(keyword)}
+                    className="flex-1 px-2 py-3 text-left text-sm"
+                  >
+                    {keyword}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteRecentKeyword(keyword)}
+                    className="shrink-0 p-2"
+                  >
+                    <Cross size={12} color="#7E7E7E" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

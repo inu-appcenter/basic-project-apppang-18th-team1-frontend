@@ -306,7 +306,6 @@ function ProductDetailPage() {
     }
   };
 
-  // 모바일: 터치 스와이프
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -314,7 +313,6 @@ function ProductDetailPage() {
     handleSwipeEnd(e.changedTouches[0].clientX);
   };
 
-  // PC: 마우스 드래그
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     touchStartX.current = e.clientX;

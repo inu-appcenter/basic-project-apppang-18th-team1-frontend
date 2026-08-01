@@ -20,6 +20,7 @@ function ProductDetailPage() {
   const { productId } = useParams();
   const [currentImage, setCurrentImage] = useState(0);
   const touchStartX = useRef(0);
+  const isDraggingRef = useRef(false);
   const [isWished, setIsWished] = useState(false);
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -293,12 +294,9 @@ function ProductDetailPage() {
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleSwipeEnd = (endX: number) => {
     if (images.length <= 1) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    const diff = touchStartX.current - endX;
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
         setCurrentImage((prev) => (prev + 1) % images.length);
@@ -306,6 +304,29 @@ function ProductDetailPage() {
         setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
       }
     }
+  };
+
+  // 모바일: 터치 스와이프
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    handleSwipeEnd(e.changedTouches[0].clientX);
+  };
+
+  // PC: 마우스 드래그
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    touchStartX.current = e.clientX;
+    isDraggingRef.current = true;
+  };
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    handleSwipeEnd(e.clientX);
+  };
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
   };
 
   if (loading) {
@@ -332,380 +353,389 @@ function ProductDetailPage() {
   }
 
   return (
-    <div className="relative flex w-full flex-col bg-white">
-      {/* Header */}
-      <header className="absolute top-0 left-0 z-10 flex h-[72px] w-full items-center py-5">
-        <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
-          <LeftArrow size={24} color="#212B36" />
-        </button>
-      </header>
-      {/* Image Slider */}
-      <div
-        className="grid w-full overflow-hidden"
-        style={{ height: '390px' }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+    <div className="relative flex h-full w-full flex-col bg-white">
+      <div className="flex-1 overflow-y-auto">
+        {/* Header */}
+        <header className="absolute top-0 left-0 z-10 flex h-[72px] w-full items-center py-5">
+          <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
+            <LeftArrow size={24} color="#212B36" />
+          </button>
+        </header>
+        {/* Image Slider */}
         <div
-          className="col-start-1 row-start-1 flex h-[390px] transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${currentImage * 100}%)` }}
+          className="grid w-full overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
         >
-          {images.length > 0 ? (
-            images.map((imageUrl, index) => (
-              <div
-                key={imageUrl}
-                className="flex h-[390px] min-w-full items-center justify-center bg-gray-100"
-              >
-                <img
-                  src={imageUrl}
-                  alt={`${product.productName} 이미지 ${index + 1}`}
-                  className="h-[390px] w-full object-cover"
-                />
-              </div>
-            ))
-          ) : (
-            <div className="flex h-[390px] min-w-full items-center justify-center bg-gray-100">
-              <span className="text-gray-400">상품 이미지 없음</span>
-            </div>
-          )}
-        </div>
-        <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
-          {images.map((imageUrl, index) => (
-            <button
-              key={imageUrl}
-              type="button"
-              onClick={() => setCurrentImage(index)}
-              className={`pointer-events-auto h-2 w-2 rounded-full transition-colors ${index === currentImage ? 'bg-black' : 'bg-gray-200'}`}
-            />
-          ))}
-        </div>
-        {/* Wished Button */}
-        <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-end pr-4 pb-4">
-          <button
-            type="button"
-            onClick={handleWishClick}
-            className="pointer-events-auto flex items-center justify-center rounded-full bg-white p-1.5"
+          <div
+            className="col-start-1 row-start-1 flex transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${currentImage * 100}%)` }}
           >
-            {isWished ? (
-              <FilledHeart size={24} color="#CB1400" />
-            ) : (
-              <EmptyHeart size={24} color="#212B36" />
-            )}
-          </button>
-        </div>
-      </div>
-      {/* Product Information */}
-      <div className="mt-2 flex items-center gap-2 px-2">
-        {product.brand.brandLogoUrl ? (
-          <img
-            src={product.brand.brandLogoUrl}
-            alt={product.brand.brandName}
-            className="h-8 w-8 flex-shrink-0 rounded-full object-cover"
-          />
-        ) : (
-          <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-200" />
-        )}
-        <div className="flex flex-1 flex-col">
-          <div className="flex items-center gap-1">
-            <span className="text-[14px] font-bold text-[#212B36]">{product.brand.brandName}</span>
-            <span className="text-[14px] font-bold text-[#212B36]">&gt;</span>
-          </div>
-          <button type="button" className="text-left text-[12px] text-gray-300">
-            브랜드 상품 모아보기
-          </button>
-        </div>
-      </div>
-      <p className="line-clamp-2 px-2 py-1 text-base">{product.productName}</p>
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center px-2">
-          {product.discountRate > 0 && (
-            <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
-              {product.discountRate}%
-            </span>
-          )}
-          <span className="text-xl font-bold text-red-300">
-            {product.salePrice.toLocaleString()}원
-          </span>
-          {product.discountRate > 0 && (
-            <span className="text-sm text-gray-400 line-through">
-              {product.originalPrice.toLocaleString()}원
-            </span>
-          )}
-        </div>
-      </div>
-      {/* Divider */}
-      <div className="my-2 h-2 w-full bg-gray-100" />
-      {/* Variants */}
-      {product.variants.length > 0 && (
-        <div className="flex flex-col gap-3 px-2 py-3">
-          <div className="flex flex-wrap items-end gap-2">
-            {product.variants.map((variant) => (
-              <div key={variant.variantId} className="flex flex-col items-center gap-1">
-                {variant.isPopular && (
-                  <span className="text-primary-200 text-xs font-bold">인기 상품</span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setSelectedVariantId(variant.variantId)}
-                  className={`flex h-24 w-[100px] flex-col items-center justify-center rounded border px-1 py-2 text-center text-sm leading-tight font-semibold ${
-                    selectedVariantId === variant.variantId
-                      ? 'border-primary-200 text-primary-200'
-                      : 'border-gray-200 text-[#212B36]'
-                  }`}
+            {images.length > 0 ? (
+              images.map((imageUrl, index) => (
+                <div
+                  key={imageUrl}
+                  className="flex min-w-full items-center justify-center bg-gray-100"
                 >
-                  {variant.variantName}
-                </button>
+                  <img
+                    src={imageUrl}
+                    alt={`${product.productName} 이미지 ${index + 1}`}
+                    className="h-auto w-full"
+                    draggable={false}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="flex h-[390px] min-w-full items-center justify-center bg-gray-100">
+                <span className="text-gray-400">상품 이미지 없음</span>
               </div>
+            )}
+          </div>
+          <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">
+            {images.map((imageUrl, index) => (
+              <button
+                key={imageUrl}
+                type="button"
+                onClick={() => setCurrentImage(index)}
+                className={`pointer-events-auto h-2 w-2 rounded-full transition-colors ${index === currentImage ? 'bg-black' : 'bg-gray-200'}`}
+              />
             ))}
           </div>
-
-          {selectedVariant && (
-            <div className="flex flex-wrap items-center gap-2 px-1">
-              <span className="text-lg font-bold text-red-300">
-                {(product.salePrice + selectedVariant.price).toLocaleString()}원
-              </span>
-              <span className="text-sm text-gray-500">
-                {selectedVariant.saveAmount.toLocaleString()}원 할인
-              </span>
-              <span className="text-sm text-gray-500">{selectedVariant.shippingType}</span>
-
-              {/* 수량 선택 (증감 버튼 방식) */}
-              <div className="flex items-center rounded border border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-2 py-1 text-sm text-[#212B36]"
-                >
-                  -
-                </button>
-                <span className="w-6 text-center text-sm">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((prev) => prev + 1)}
-                  className="px-2 py-1 text-sm text-[#212B36]"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+          {/* Wished Button */}
+          <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-end pr-4 pb-4">
+            <button
+              type="button"
+              onClick={handleWishClick}
+              className="pointer-events-auto flex items-center justify-center rounded-full bg-white p-1.5"
+            >
+              {isWished ? (
+                <FilledHeart size={24} color="#CB1400" />
+              ) : (
+                <EmptyHeart size={24} color="#212B36" />
+              )}
+            </button>
+          </div>
+        </div>
+        {/* Product Information */}
+        <div className="mt-2 flex items-center gap-2 px-2">
+          {product.brand.brandLogoUrl ? (
+            <img
+              src={product.brand.brandLogoUrl}
+              alt={product.brand.brandName}
+              className="h-8 w-8 flex-shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-200" />
           )}
+          <div className="flex flex-1 flex-col">
+            <div className="flex items-center gap-1">
+              <span className="text-[14px] font-bold text-[#212B36]">
+                {product.brand.brandName}
+              </span>
+              <span className="text-[14px] font-bold text-[#212B36]">&gt;</span>
+            </div>
+            <button type="button" className="text-left text-[12px] text-gray-300">
+              브랜드 상품 모아보기
+            </button>
+          </div>
         </div>
-      )}
-      {/* 상품 정보 */}
-      <div className="mt-5 flex flex-col">
-        <p className="px-2 text-base font-bold text-[#212B36]">상품 정보</p>
+        <p className="line-clamp-2 px-2 py-1 text-base">{product.productName}</p>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center px-2">
+            {product.discountRate > 0 && (
+              <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
+                {product.discountRate}%
+              </span>
+            )}
+            <span className="text-xl font-bold text-red-300">
+              {product.salePrice.toLocaleString()}원
+            </span>
+            {product.discountRate > 0 && (
+              <span className="text-sm text-gray-400 line-through">
+                {product.originalPrice.toLocaleString()}원
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Divider */}
         <div className="my-2 h-2 w-full bg-gray-100" />
-        {product.detailImages.map((imageUrl, index) => (
-          <img
-            key={imageUrl}
-            src={imageUrl}
-            alt={`${product.productName} 상세 이미지 ${index + 1}`}
-            className="w-full"
-          />
-        ))}
-      </div>
-      <div className="my-2 h-2 w-full bg-gray-100" />
-      {/* 상품 리뷰 */}
-      <div className="mb-20 flex flex-col">
-        <p className="px-2 pt-4 pb-3 text-base font-bold text-[#212B36]">상품 리뷰</p>
-        <div className="border-t border-gray-100" />
-        <p className="px-2 py-3 text-xs text-gray-400">
-          동일한 상품에 대해 작성된 상품평으로, 판매자는 다를 수 있습니다.
-        </p>
-        <div className="flex items-center justify-end px-2 pb-5">
-          <button
-            type="button"
-            onClick={handleToggleReviewForm}
-            className="border-primary-200 text-primary-200 flex items-center gap-1 rounded border px-3 py-1.5 text-sm font-bold"
-          >
-            <Pencil size={15} color="#346AFF" /> 리뷰 작성하기
-          </button>
-        </div>
-
-        {showReviewForm && (
-          <div className="flex flex-col gap-4 border-t border-gray-100 px-2 pt-4 pb-6">
-            {/* 별점 */}
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((score) => (
-                <button
-                  key={score}
-                  type="button"
-                  onClick={() => setReviewRating(score)}
-                  className="p-0.5"
-                >
-                  <Star
-                    size={28}
-                    color={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
-                    fill={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
-                  />
-                </button>
+        {/* Variants */}
+        {product.variants.length > 0 && (
+          <div className="flex flex-col gap-3 px-2 py-3">
+            <div className="flex flex-wrap items-end gap-2">
+              {product.variants.map((variant) => (
+                <div key={variant.variantId} className="flex flex-col items-center gap-1">
+                  {variant.isPopular && (
+                    <span className="text-primary-200 text-xs font-bold">인기 상품</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVariantId(variant.variantId)}
+                    className={`flex h-24 w-[100px] flex-col items-center justify-center rounded border px-1 py-2 text-center text-sm leading-tight font-semibold ${
+                      selectedVariantId === variant.variantId
+                        ? 'border-primary-200 text-primary-200'
+                        : 'border-gray-200 text-[#212B36]'
+                    }`}
+                  >
+                    {variant.variantName}
+                  </button>
+                </div>
               ))}
             </div>
 
-            {/* 리뷰 본문 */}
-            <textarea
-              value={reviewContent}
-              onChange={(e) => setReviewContent(e.target.value)}
-              placeholder="상품에 대한 리뷰를 남겨주세요."
-              maxLength={REVIEW_CONTENT_MAX_LENGTH}
-              className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
-            />
+            {selectedVariant && (
+              <div className="flex flex-wrap items-center gap-2 px-1">
+                <span className="text-lg font-bold text-red-300">
+                  {(product.salePrice + selectedVariant.price).toLocaleString()}원
+                </span>
+                <span className="text-sm text-gray-500">
+                  {selectedVariant.saveAmount.toLocaleString()}원 할인
+                </span>
+                <span className="text-sm text-gray-500">{selectedVariant.shippingType}</span>
 
-            <button
-              type="button"
-              onClick={handleSubmitReview}
-              disabled={isSubmittingReview}
-              className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
-            >
-              등록하기
-            </button>
+                {/* 수량 선택 (증감 버튼 방식) */}
+                <div className="flex items-center rounded border border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="px-2 py-1 text-sm text-[#212B36]"
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center text-sm">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((prev) => prev + 1)}
+                    className="px-2 py-1 text-sm text-[#212B36]"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
-
-        {/* 구분선 */}
-        <div className="border-t border-gray-100" />
-
-        {/* 리뷰 목록 */}
+        {/* 상품 정보 */}
+        <div className="mt-5 flex flex-col">
+          <p className="px-2 text-base font-bold text-[#212B36]">상품 정보</p>
+          <div className="my-2 h-2 w-full bg-gray-100" />
+          {product.detailImages.map((imageUrl, index) => (
+            <img
+              key={imageUrl}
+              src={imageUrl}
+              alt={`${product.productName} 상세 이미지 ${index + 1}`}
+              className="w-full"
+            />
+          ))}
+        </div>
+        <div className="my-2 h-2 w-full bg-gray-100" />
+        {/* 상품 리뷰 */}
         <div className="flex flex-col">
-          {!reviewsLoading && reviews.length === 0 && (
-            <p className="px-2 py-10 text-center text-sm text-gray-400">
-              아직 작성된 리뷰가 없습니다.
-            </p>
-          )}
-
-          {reviews.map((review) => {
-            const isExpanded = expandedReviewIds.has(review.reviewId);
-            const isLongContent = review.content.length > REVIEW_CONTENT_PREVIEW_LIMIT;
-            const isEditing = editingReviewId === review.reviewId;
-
-            return (
-              <div
-                key={review.reviewId}
-                className="flex flex-col gap-2 border-b border-gray-100 px-2 py-4 last:border-b-0"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-0.5">
-                      <Star
-                        size={14}
-                        color={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
-                        fill={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
-                      />
-                      <Star
-                        size={14}
-                        color={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
-                        fill={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
-                      />
-                      <Star
-                        size={14}
-                        color={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
-                        fill={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
-                      />
-                      <Star
-                        size={14}
-                        color={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
-                        fill={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
-                      />
-                      <Star
-                        size={14}
-                        color={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
-                        fill={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
-                      />
-                    </div>
-                    <span className="text-xs font-medium text-[#212B36]">{review.nickname}</span>
-                  </div>
-                  {ownedReviewIds.has(review.reviewId) && (
-                    <button
-                      type="button"
-                      onClick={() => handleToggleEditReview(review)}
-                      className="text-xs text-gray-400 underline"
-                    >
-                      수정하기
-                    </button>
-                  )}
-                </div>
-
-                {isEditing ? (
-                  <div className="flex flex-col gap-4 pt-1">
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5].map((score) => (
-                        <button
-                          key={score}
-                          type="button"
-                          onClick={() => setEditRating(score)}
-                          className="p-0.5"
-                        >
-                          <Star
-                            size={28}
-                            color={score <= editRating ? '#F5B000' : '#CDCDCD'}
-                            fill={score <= editRating ? '#F5B000' : '#CDCDCD'}
-                          />
-                        </button>
-                      ))}
-                    </div>
-
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      placeholder="상품에 대한 리뷰를 남겨주세요."
-                      maxLength={REVIEW_CONTENT_MAX_LENGTH}
-                      className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateReview(review.reviewId)}
-                      disabled={isSubmittingEdit}
-                      className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
-                    >
-                      수정하기
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <p className={`text-sm text-[#212B36] ${isExpanded ? '' : 'line-clamp-3'}`}>
-                      {review.content}
-                    </p>
-
-                    {isLongContent && (
-                      <button
-                        type="button"
-                        onClick={() => toggleReviewExpand(review.reviewId)}
-                        className="self-start text-xs text-gray-400 underline"
-                      >
-                        {isExpanded ? '접기' : '더보기'}
-                      </button>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">도움돼요 {review.helpfulCount}</span>
-                      <button
-                        type="button"
-                        className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500"
-                      >
-                        도움돼요
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
-
-          {reviewsPage < reviewsTotalPages && (
+          <p className="px-2 pt-4 pb-3 text-base font-bold text-[#212B36]">상품 리뷰</p>
+          <div className="border-t border-gray-100" />
+          <p className="px-2 py-3 text-xs text-gray-400">
+            동일한 상품에 대해 작성된 상품평으로, 판매자는 다를 수 있습니다.
+          </p>
+          <div className="flex items-center justify-end px-2 pb-5">
             <button
               type="button"
-              onClick={handleLoadMoreReviews}
-              disabled={reviewsLoading}
-              className="mx-2 my-3 rounded border border-gray-200 py-2 text-sm text-gray-500 disabled:opacity-50"
+              onClick={handleToggleReviewForm}
+              className="border-primary-200 text-primary-200 mr-2 flex items-center gap-1 rounded border px-3 py-1.5 text-sm font-bold"
             >
-              {reviewsLoading ? '불러오는 중...' : '리뷰 더보기'}
+              <Pencil size={15} color="#346AFF" /> 리뷰 작성하기
             </button>
+          </div>
+
+          {showReviewForm && (
+            <div className="flex flex-col gap-4 border-t border-gray-100 px-2 pt-4 pb-6">
+              {/* 별점 */}
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <button
+                    key={score}
+                    type="button"
+                    onClick={() => setReviewRating(score)}
+                    className="p-0.5"
+                  >
+                    <Star
+                      size={28}
+                      color={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
+                      fill={score <= reviewRating ? '#F5B000' : '#CDCDCD'}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {/* 리뷰 본문 */}
+              <textarea
+                value={reviewContent}
+                onChange={(e) => setReviewContent(e.target.value)}
+                placeholder="상품에 대한 리뷰를 남겨주세요."
+                maxLength={REVIEW_CONTENT_MAX_LENGTH}
+                className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
+              />
+
+              <button
+                type="button"
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview}
+                className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
+              >
+                등록하기
+              </button>
+            </div>
           )}
+
+          {/* 구분선 */}
+          <div className="border-t border-gray-100" />
+
+          {/* 리뷰 목록 */}
+          <div className="flex flex-col">
+            {!reviewsLoading && reviews.length === 0 && (
+              <p className="px-2 py-10 text-center text-sm text-gray-400">
+                아직 작성된 리뷰가 없습니다.
+              </p>
+            )}
+
+            {reviews.map((review) => {
+              const isExpanded = expandedReviewIds.has(review.reviewId);
+              const isLongContent = review.content.length > REVIEW_CONTENT_PREVIEW_LIMIT;
+              const isEditing = editingReviewId === review.reviewId;
+
+              return (
+                <div
+                  key={review.reviewId}
+                  className="flex flex-col gap-2 border-b border-gray-100 px-2 py-4 last:border-b-0"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-0.5">
+                        <Star
+                          size={14}
+                          color={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
+                          fill={review.rating >= 1 ? '#F5B000' : '#CDCDCD'}
+                        />
+                        <Star
+                          size={14}
+                          color={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
+                          fill={review.rating >= 2 ? '#F5B000' : '#CDCDCD'}
+                        />
+                        <Star
+                          size={14}
+                          color={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
+                          fill={review.rating >= 3 ? '#F5B000' : '#CDCDCD'}
+                        />
+                        <Star
+                          size={14}
+                          color={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
+                          fill={review.rating >= 4 ? '#F5B000' : '#CDCDCD'}
+                        />
+                        <Star
+                          size={14}
+                          color={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
+                          fill={review.rating >= 5 ? '#F5B000' : '#CDCDCD'}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-[#212B36]">{review.nickname}</span>
+                    </div>
+                    {ownedReviewIds.has(review.reviewId) && (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleEditReview(review)}
+                        className="text-xs text-gray-400 underline"
+                      >
+                        수정하기
+                      </button>
+                    )}
+                  </div>
+
+                  {isEditing ? (
+                    <div className="flex flex-col gap-4 pt-1">
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((score) => (
+                          <button
+                            key={score}
+                            type="button"
+                            onClick={() => setEditRating(score)}
+                            className="p-0.5"
+                          >
+                            <Star
+                              size={28}
+                              color={score <= editRating ? '#F5B000' : '#CDCDCD'}
+                              fill={score <= editRating ? '#F5B000' : '#CDCDCD'}
+                            />
+                          </button>
+                        ))}
+                      </div>
+
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        placeholder="상품에 대한 리뷰를 남겨주세요."
+                        maxLength={REVIEW_CONTENT_MAX_LENGTH}
+                        className="min-h-[180px] w-full resize-none rounded border border-gray-200 p-3 text-sm"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateReview(review.reviewId)}
+                        disabled={isSubmittingEdit}
+                        className="bg-primary-200 w-full rounded py-3 text-sm font-bold text-white disabled:opacity-50"
+                      >
+                        수정하기
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className={`text-sm text-[#212B36] ${isExpanded ? '' : 'line-clamp-3'}`}>
+                        {review.content}
+                      </p>
+
+                      {isLongContent && (
+                        <button
+                          type="button"
+                          onClick={() => toggleReviewExpand(review.reviewId)}
+                          className="self-start text-xs text-gray-400 underline"
+                        >
+                          {isExpanded ? '접기' : '더보기'}
+                        </button>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400">
+                          도움돼요 {review.helpfulCount}
+                        </span>
+                        <button
+                          type="button"
+                          className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500"
+                        >
+                          도움돼요
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+
+            {reviewsPage < reviewsTotalPages && (
+              <button
+                type="button"
+                onClick={handleLoadMoreReviews}
+                disabled={reviewsLoading}
+                className="mx-2 my-3 rounded border border-gray-200 py-2 text-sm text-gray-500 disabled:opacity-50"
+              >
+                {reviewsLoading ? '불러오는 중...' : '리뷰 더보기'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       {/* Bottom CTA */}
-      <div className="fixed bottom-16 left-1/2 z-40 w-full max-w-120 -translate-x-1/2 bg-white px-3 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+      <div className="w-full bg-white px-3 py-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
         <div className="flex gap-2">
           <button
             type="button"

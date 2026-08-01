@@ -8,6 +8,7 @@ import {
   getReviews,
   updateReview,
   getReviewOwnership,
+  toggleReviewHelpful,
   type ReviewListItem,
 } from '@/api/review';
 
@@ -291,6 +292,33 @@ function ProductDetailPage() {
       alert('리뷰 수정에 실패했습니다.');
     } finally {
       setIsSubmittingEdit(false);
+    }
+  };
+
+  const handleToggleHelpful = async (review: ReviewListItem) => {
+    if (!productId) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await toggleReviewHelpful(productId, review.reviewId);
+      const { isHelpful, helpfulCount } = response.data;
+      setReviews((prev) =>
+        prev.map((item) =>
+          item.reviewId === review.reviewId ? { ...item, isHelpful, helpfulCount } : item,
+        ),
+      );
+    } catch (err: any) {
+      console.error('도움돼요 처리 실패', err);
+      if (!err.response) {
+        alert('서버와 연결할 수 없습니다.');
+        return;
+      }
+      alert(err.response.data.message);
     }
   };
 
@@ -714,7 +742,9 @@ function ProductDetailPage() {
                         </span>
                         <button
                           type="button"
-                          className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500"
+                          onClick={() => handleToggleHelpful(review)}
+                          disabled={review.isHelpful}
+                          className="border-primary-200 text-primary-200 rounded border px-2 py-1 text-xs font-semibold disabled:border-gray-200 disabled:text-gray-400"
                         >
                           도움돼요
                         </button>

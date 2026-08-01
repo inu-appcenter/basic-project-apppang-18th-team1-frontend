@@ -487,10 +487,10 @@ function ProductDetailPage() {
             {selectedVariant && (
               <div className="flex flex-wrap items-center gap-2 px-1">
                 <span className="text-lg font-bold text-red-300">
-                  {(product.salePrice + selectedVariant.price).toLocaleString()}원
+                  {((product.salePrice + selectedVariant.price) * quantity).toLocaleString()}원
                 </span>
                 <span className="text-sm text-gray-500">
-                  {selectedVariant.saveAmount.toLocaleString()}원 할인
+                  {(selectedVariant.saveAmount * quantity).toLocaleString()}원 할인
                 </span>
                 <span className="text-sm text-gray-500">{selectedVariant.shippingType}</span>
 

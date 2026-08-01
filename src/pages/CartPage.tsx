@@ -93,7 +93,9 @@ function CartItemRow({
           >
             <p className="text-xs text-gray-500">{brandName}</p>
             <p className="text-xs text-gray-500">{estimatedArrivalDate} 도착 예정</p>
-            <p className="text-xs text-gray-400 line-through">{originalPrice.toLocaleString()}원</p>
+            <p className="text-xs text-gray-400 line-through">
+              {(originalPrice * quantity).toLocaleString()}원
+            </p>
             <div className="flex items-center gap-1">
               {discountRate > 0 && (
                 <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
@@ -101,7 +103,7 @@ function CartItemRow({
                 </span>
               )}
               <span className="text-base font-bold text-red-300">
-                {salePrice.toLocaleString()}원
+                {(salePrice * quantity).toLocaleString()}원
               </span>
               <span className="text-xs text-gray-500">{shippingBadge}</span>
             </div>
@@ -294,76 +296,82 @@ function CartPage() {
   };
 
   return (
-    <div className="relative flex w-full flex-col items-center gap-3 bg-white px-3 pb-10">
-      {/* Header */}
-      <header className="flex h-[72px] w-full items-center justify-center py-5">
-        <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
-          <LeftArrow size={24} color="#212B36" />
-        </button>
-        <h1 className="text-[20px] leading-none font-bold">장바구니</h1>
-      </header>
-      <div className="w-full">
-        {!loading && !error && allItems.length > 0 && (
-          <div className="flex w-full items-center gap-3 border-b border-gray-200 px-3 py-3">
-            <input
-              type="checkbox"
-              checked={isAllSelected}
-              onChange={handleToggleAll}
-              className="h-5 w-5"
-            />
-            <span className="text-sm">전체선택</span>
-            <button type="button" onClick={handleDeleteSelected} className="text-sm text-gray-500">
-              선택 삭제
-            </button>
-          </div>
-        )}
-
-        {loading && (
-          <div className="w-full py-10 text-center text-sm text-gray-400">불러오는 중...</div>
-        )}
-
-        {error && <div className="w-full py-10 text-center text-sm text-red-400">{error}</div>}
-
-        {!loading && !error && allItems.length === 0 && (
-          <div className="w-full py-10 text-center text-sm text-gray-400">
-            장바구니에 담긴 상품이 없습니다.
-          </div>
-        )}
-
-        {!loading &&
-          !error &&
-          shippingGroups.map((group) =>
-            group.items.map((item) => (
-              <CartItemRow
-                key={item.cartItemId}
-                cartItemId={item.cartItemId}
-                productId={item.productId}
-                productName={item.productName}
-                thumbnailUrl={item.thumbnailUrl}
-                brandName={item.brandName}
-                optionText={item.optionText}
-                estimatedArrivalDate={item.estimatedArrivalDate}
-                quantity={item.quantity}
-                isSelected={item.isSelected}
-                originalPrice={item.price.originalPrice}
-                discountRate={item.price.wowCouponDiscountRate}
-                salePrice={item.price.salePrice}
-                shippingBadge={group.shippingBadge}
-                onQuantityChange={handleQuantityChange}
-                onDelete={handleDeleteItem}
-                onSelectToggle={handleSelectToggle}
+    <div className="relative flex h-full w-full flex-col bg-white">
+      <div className="flex flex-1 flex-col items-center gap-3 overflow-y-auto px-3 pb-10">
+        {/* Header */}
+        <header className="flex h-[72px] w-full items-center justify-center py-5">
+          <button type="button" onClick={() => navigate(-1)} className="absolute left-3 p-1">
+            <LeftArrow size={24} color="#212B36" />
+          </button>
+          <h1 className="text-[20px] leading-none font-bold">장바구니</h1>
+        </header>
+        <div className="w-full">
+          {!loading && !error && allItems.length > 0 && (
+            <div className="flex w-full items-center gap-3 border-b border-gray-200 px-3 py-3">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={handleToggleAll}
+                className="h-5 w-5"
               />
-            )),
+              <span className="text-sm">전체선택</span>
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="text-sm text-gray-500"
+              >
+                선택 삭제
+              </button>
+            </div>
           )}
 
-        {isExpanded && (
-          <div
-            className="fixed top-0 bottom-0 left-1/2 z-40 w-full max-w-120 -translate-x-1/2 bg-black/30"
-            onClick={() => setIsExpanded(false)}
-          />
-        )}
+          {loading && (
+            <div className="w-full py-10 text-center text-sm text-gray-400">불러오는 중...</div>
+          )}
+
+          {error && <div className="w-full py-10 text-center text-sm text-red-400">{error}</div>}
+
+          {!loading && !error && allItems.length === 0 && (
+            <div className="w-full py-10 text-center text-sm text-gray-400">
+              장바구니에 담긴 상품이 없습니다.
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            shippingGroups.map((group) =>
+              group.items.map((item) => (
+                <CartItemRow
+                  key={item.cartItemId}
+                  cartItemId={item.cartItemId}
+                  productId={item.productId}
+                  productName={item.productName}
+                  thumbnailUrl={item.thumbnailUrl}
+                  brandName={item.brandName}
+                  optionText={item.optionText}
+                  estimatedArrivalDate={item.estimatedArrivalDate}
+                  quantity={item.quantity}
+                  isSelected={item.isSelected}
+                  originalPrice={item.price.originalPrice}
+                  discountRate={item.price.wowCouponDiscountRate}
+                  salePrice={item.price.salePrice}
+                  shippingBadge={group.shippingBadge}
+                  onQuantityChange={handleQuantityChange}
+                  onDelete={handleDeleteItem}
+                  onSelectToggle={handleSelectToggle}
+                />
+              )),
+            )}
+
+          {isExpanded && (
+            <div
+              className="fixed top-0 bottom-0 left-1/2 z-40 w-full max-w-120 -translate-x-1/2 bg-black/30"
+              onClick={() => setIsExpanded(false)}
+            />
+          )}
+        </div>
       </div>
-      <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-120 -translate-x-1/2 bg-white">
+      <div className="w-full bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
         {isExpanded && (
           <div className="flex flex-col gap-2 rounded-t-lg border-t border-gray-200 px-3 py-4">
             {/* 상세 항목들 */}

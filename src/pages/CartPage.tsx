@@ -8,7 +8,6 @@ import {
   type CartShippingGroup,
   type CartListSummary,
 } from '@/api/cart';
-import { createOrder } from '@/api/order';
 
 const EMPTY_SUMMARY: CartListSummary = {
   totalProductPrice: 0,
@@ -140,7 +139,6 @@ function CartPage() {
   const [summary, setSummary] = useState<CartListSummary>(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
   const hasAlertedRef = useRef(false);
 
   const allItems = shippingGroups.flatMap((group) => group.items);
@@ -280,19 +278,20 @@ function CartPage() {
       return;
     }
 
-    setShowOrderConfirm(true);
-  };
-
-  const handleConfirmOrder = async () => {
-    setShowOrderConfirm(false);
-
-    try {
-      const response = await createOrder();
-      navigate('/order', { state: { order: response.data.data } });
-    } catch (err) {
-      console.error('주문 생성 실패', err);
-      alert('주문에 실패했습니다.');
-    }
+    navigate('/checkout', {
+      state: {
+        mode: 'cart',
+        items: selectedItems.map((item) => ({
+          key: item.cartItemId,
+          productName: item.productName,
+          thumbnailUrl: item.thumbnailUrl,
+          brandName: item.brandName,
+          optionText: item.optionText,
+          quantity: item.quantity,
+          salePrice: item.price.salePrice,
+        })),
+      },
+    });
   };
 
   return (
@@ -431,36 +430,6 @@ function CartPage() {
           총 {itemCount}개의 상품 구매하기
         </button>
       </div>
-
-      {showOrderConfirm && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-6"
-          onClick={() => setShowOrderConfirm(false)}
-        >
-          <div
-            className="w-full max-w-80 rounded-lg bg-white p-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="mb-5 text-center text-sm font-bold text-[#212B36]">구매하시겠습니까?</p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowOrderConfirm(false)}
-                className="flex-1 rounded border border-gray-300 py-2 text-sm font-semibold text-[#212B36]"
-              >
-                아니오
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmOrder}
-                className="bg-primary-200 flex-1 rounded py-2 text-sm font-semibold text-white"
-              >
-                예
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -196,7 +196,7 @@ function ProductDetailPage() {
   };
 
   const handleBuyNowClick = () => {
-    if (!productId) return;
+    if (!productId || !product) return;
 
     if (!localStorage.getItem('accessToken')) {
       alert('로그인이 필요한 기능입니다.');
@@ -204,34 +204,31 @@ function ProductDetailPage() {
       return;
     }
 
-    if (!selectedVariantId) {
+    if (!selectedVariantId || !selectedVariant) {
       alert('옵션을 선택해주세요.');
       return;
     }
-
-    setShowBuyNowConfirm(true);
-  };
-
-  const handleConfirmBuyNow = async () => {
-    if (!productId || !selectedVariantId) return;
-
-    setShowBuyNowConfirm(false);
-
-    try {
-      const response = await buyNow({
+    
+    navigate('/checkout', {
+      state: {
+        mode: 'buyNow',
         productId: Number(productId),
         optionId: selectedVariantId,
         quantity,
-      });
-      navigate('/order', { state: { order: response.data.data } });
-    } catch (err: any) {
-      console.error('바로구매 실패', err);
-      if (!err.response) {
-        alert('서버와 연결할 수 없습니다.');
-        return;
-      }
-      alert(err.response.data.message);
-    }
+        items: [
+          {
+            key: product.productId,
+            productName: product.productName,
+            thumbnailUrl: images[0] ?? '',
+            brandName: product.brand.brandName,
+            optionText: selectedVariant.variantName,
+            quantity,
+            salePrice: product.salePrice + selectedVariant.price,
+          },
+        ],
+      },
+    });
+
   };
 
   const handleToggleReviewForm = () => {

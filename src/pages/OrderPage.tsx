@@ -2,11 +2,21 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Cross } from '@/components/icons';
 import type { OrderData } from '@/api/order';
+import type { Address } from '@/api/address';
+
+const formatPhoneNumber = (value: string) => {
+  const numbers = value.replace(/\D/g, '');
+  if (numbers.length <= 3) return numbers;
+  if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+  return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+};
 
 function OrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const order = (location.state as { order?: OrderData } | null)?.order;
+  const state = location.state as { order?: OrderData; address?: Address } | null;
+  const order = state?.order;
+  const address = state?.address;
 
   useEffect(() => {
     if (!order) {
@@ -47,6 +57,21 @@ function OrderPage() {
           </div>
         ))}
       </div>
+
+      {address && (
+        <div className="flex w-full flex-col gap-1 rounded border border-gray-200 px-3 py-4">
+          <p className="text-sm font-bold text-[#212B36]">배송지</p>
+          <p className="text-xs text-gray-500">
+            {address.recipientName} · {formatPhoneNumber(address.recipientPhone)}
+          </p>
+          <p className="text-sm text-[#212B36]">
+            {address.mainAddress} {address.detailAddress}
+          </p>
+          {address.deliveryMessage && (
+            <p className="text-xs text-gray-400">{address.deliveryMessage}</p>
+          )}
+        </div>
+      )}
 
       <div className="flex w-full flex-col gap-2 rounded border border-gray-200 px-3 py-4">
         <div className="flex items-center justify-between">

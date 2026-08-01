@@ -18,6 +18,7 @@ import OrderPage from '@/pages/OrderPage';
 import OrderListPage from '@/pages/OrderListPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AddressesPage from '@/pages/AddressesPage';
+import CheckoutPage from '@/pages/CheckoutPage';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
 
         <Route element={<CommonLayoutNoNavigationBar />}>
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order" element={<OrderPage />} />
           <Route path="/order-list" element={<OrderListPage />} />
         </Route>

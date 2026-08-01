@@ -435,7 +435,13 @@ function ProductDetailPage() {
               </span>
               <span className="text-[14px] font-bold text-[#212B36]">&gt;</span>
             </div>
-            <button type="button" className="text-left text-[12px] text-gray-300">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/products?search=${encodeURIComponent(product.brand.brandName)}`)
+              }
+              className="text-left text-[12px] text-gray-300"
+            >
               브랜드 상품 모아보기
             </button>
           </div>

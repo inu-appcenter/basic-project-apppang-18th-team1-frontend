@@ -18,6 +18,7 @@ const EMPTY_SUMMARY: CartListSummary = {
 
 interface CartItemRowProps {
   cartItemId: number;
+  productId: number;
   productName: string;
   thumbnailUrl: string;
   brandName: string;
@@ -36,6 +37,7 @@ interface CartItemRowProps {
 
 function CartItemRow({
   cartItemId,
+  productId,
   productName,
   thumbnailUrl,
   brandName,
@@ -51,6 +53,12 @@ function CartItemRow({
   onDelete,
   onSelectToggle,
 }: CartItemRowProps) {
+  const navigate = useNavigate();
+
+  const goToProductDetail = () => {
+    navigate(`/products/${productId}`);
+  };
+
   return (
     <div className="w-full border-b border-gray-200 px-3 py-5">
       {/* 체크박스 + 상품명 + 옵션 + 삭제 */}
@@ -62,10 +70,10 @@ function CartItemRow({
             onChange={(e) => onSelectToggle(cartItemId, e.target.checked)}
             className="h-5 w-5 py-2"
           />
-          <div className="flex flex-col">
+          <button type="button" onClick={goToProductDetail} className="flex flex-col text-left">
             <p className="text-sm font-medium">{productName}</p>
             <p className="text-xs text-gray-500">{optionText}</p>
-          </div>
+          </button>
         </div>
         <button type="button" onClick={() => onDelete(cartItemId)} className="shrink-0 p-1">
           <Cross size={16} color="#7E7E7E" />
@@ -74,24 +82,30 @@ function CartItemRow({
 
       {/* 썸네일 + 상세 정보 */}
       <div className="mt-3 flex gap-3">
-        <img
-          src={thumbnailUrl}
-          alt={productName}
-          className="h-24 w-24 shrink-0 rounded object-cover"
-        />
+        <button type="button" onClick={goToProductDetail} className="shrink-0">
+          <img src={thumbnailUrl} alt={productName} className="h-24 w-24 rounded object-cover" />
+        </button>
         <div className="flex flex-1 flex-col gap-1">
-          <p className="text-xs text-gray-500">{brandName}</p>
-          <p className="text-xs text-gray-500">{estimatedArrivalDate} 도착 예정</p>
-          <p className="text-xs text-gray-400 line-through">{originalPrice.toLocaleString()}원</p>
-          <div className="flex items-center gap-1">
-            {discountRate > 0 && (
-              <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
-                {discountRate}%
+          <button
+            type="button"
+            onClick={goToProductDetail}
+            className="flex flex-col gap-1 text-left"
+          >
+            <p className="text-xs text-gray-500">{brandName}</p>
+            <p className="text-xs text-gray-500">{estimatedArrivalDate} 도착 예정</p>
+            <p className="text-xs text-gray-400 line-through">{originalPrice.toLocaleString()}원</p>
+            <div className="flex items-center gap-1">
+              {discountRate > 0 && (
+                <span className="inline-block min-w-[50px] bg-red-300 py-0.5 pr-4 pl-2 text-left text-sm font-bold text-white [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)]">
+                  {discountRate}%
+                </span>
+              )}
+              <span className="text-base font-bold text-red-300">
+                {salePrice.toLocaleString()}원
               </span>
-            )}
-            <span className="text-base font-bold text-red-300">{salePrice.toLocaleString()}원</span>
-            <span className="text-xs text-gray-500">{shippingBadge}</span>
-          </div>
+              <span className="text-xs text-gray-500">{shippingBadge}</span>
+            </div>
+          </button>
 
           {/* 수량 조절 */}
           <div className="flex w-fit items-center rounded border border-gray-200">
@@ -323,6 +337,7 @@ function CartPage() {
               <CartItemRow
                 key={item.cartItemId}
                 cartItemId={item.cartItemId}
+                productId={item.productId}
                 productName={item.productName}
                 thumbnailUrl={item.thumbnailUrl}
                 brandName={item.brandName}

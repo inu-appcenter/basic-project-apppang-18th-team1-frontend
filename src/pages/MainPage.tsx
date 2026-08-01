@@ -149,8 +149,10 @@ function MainPage() {
                     {banner.rank}위 인기상품
                   </span>
                   <span className="text-xs text-gray-500">{banner.product.brandName}</span>
-                  <span className="line-clamp-2 text-sm font-bold text-[#212B36]">
-                    {banner.product.name}
+                  <span className="text-sm font-bold whitespace-pre-line text-[#212B36]">
+                    {banner.product.name.length > 30
+                      ? `${banner.product.name.slice(0, 30)}\n${banner.product.name.slice(30)}`
+                      : banner.product.name}
                   </span>
                   <span className="text-xs text-gray-400 line-through">
                     {banner.product.originPrice.toLocaleString()}원

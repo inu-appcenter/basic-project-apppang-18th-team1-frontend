@@ -342,24 +342,23 @@ function ProductDetailPage() {
       {/* Image Slider */}
       <div
         className="grid w-full overflow-hidden"
-        style={{ height: '390px' }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="col-start-1 row-start-1 flex h-[390px] transition-transform duration-300 ease-in-out"
+          className="col-start-1 row-start-1 flex transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${currentImage * 100}%)` }}
         >
           {images.length > 0 ? (
             images.map((imageUrl, index) => (
               <div
                 key={imageUrl}
-                className="flex h-[390px] min-w-full items-center justify-center bg-gray-100"
+                className="flex min-w-full items-center justify-center bg-gray-100"
               >
                 <img
                   src={imageUrl}
                   alt={`${product.productName} 이미지 ${index + 1}`}
-                  className="h-[390px] w-full object-cover"
+                  className="h-auto w-full"
                 />
               </div>
             ))

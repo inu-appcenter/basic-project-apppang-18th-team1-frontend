@@ -31,3 +31,4 @@ export { default as Mouse } from './Mouse';
 export { default as Keyboard } from './Keyboard';
 export { default as Gamepad } from './Gamepad';
 export { default as Battery } from './battery';
+export { default as MapPin } from './MapPin';

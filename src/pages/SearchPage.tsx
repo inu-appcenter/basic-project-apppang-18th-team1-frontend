@@ -106,7 +106,6 @@ function SearchPage() {
     return () => controller.abort();
   }, []);
 
-  // 검색어 입력 중 자동완성 (300ms debounce, 1자 이상일 때만 조회)
   useEffect(() => {
     const trimmed = searchValue.trim();
     if (!trimmed) {

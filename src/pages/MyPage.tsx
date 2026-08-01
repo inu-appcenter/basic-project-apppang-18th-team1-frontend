@@ -1,22 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Human, Gear, Receipt, FilledHeart } from '@/components/icons';
 import { useNavigate } from 'react-router-dom';
 import { logout, getMyProfile } from '@/api/auth';
 
+function MyPageGuest() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative flex w-full flex-col items-center justify-center gap-3 bg-white px-6 py-20">
+      <p className="text-sm text-gray-400">로그인이 필요한 기능입니다.</p>
+      <button
+        type="button"
+        onClick={() => navigate('/login')}
+        className="bg-primary-200 w-full rounded py-3 text-base font-bold text-white"
+      >
+        로그인하러 가기
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate('/register')}
+        className="text-primary-200 border-primary-200 w-full rounded border py-3 text-base font-bold"
+      >
+        회원가입하러 가기
+      </button>
+    </div>
+  );
+}
+
 function MyPage() {
   const navigate = useNavigate();
-  const hasAlertedRef = useRef(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('accessToken'));
   const [nickname, setNickname] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
-      if (!hasAlertedRef.current) {
-        hasAlertedRef.current = true;
-        alert('로그인이 필요한 기능입니다.');
-        navigate('/login');
-      }
+      setIsLoggedIn(false);
       return undefined;
     }
+
+    setIsLoggedIn(true);
 
     const controller = new AbortController();
 
@@ -58,6 +80,10 @@ function MyPage() {
       icon: <FilledHeart size={24} color="#346AFF" />,
     },
   ];
+
+  if (!isLoggedIn) {
+    return <MyPageGuest />;
+  }
 
   return (
     <div className="relative flex w-full flex-col bg-white">

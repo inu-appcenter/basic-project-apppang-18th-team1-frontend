@@ -16,6 +16,7 @@ import {
   IdCard,
 } from '@/components/icons';
 import AgreementModal from '@/components/AgreementModal';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 const TERMS_CONTENT: Record<number, string> = {
   2: '쿠팡 이용약관 동의',
@@ -47,6 +48,7 @@ function RegisterPage() {
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [nicknameError, setNicknameError] = useState('');
   const [registerError, setRegisterError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const isActive =
     email.trim() !== '' &&
@@ -128,6 +130,7 @@ function RegisterPage() {
   }, [agree1, agree2, agree3, agree4, agree5, agree6]);
 
   const handleRegister = async () => {
+    setIsRegistering(true);
     try {
       const response = await signup({
         name,
@@ -152,6 +155,8 @@ function RegisterPage() {
       }
 
       setRegisterError('회원가입에 실패했습니다.');
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -262,8 +267,9 @@ function RegisterPage() {
           className="flex-1 px-3 text-sm font-bold outline-none placeholder:text-gray-300"
           value={name}
           onChange={(e) => {
-            setName(e.target.value);
-            handleNameValidation(e.target.value);
+            const filtered = e.target.value.replace(/[^a-zA-Z가-힣]/g, '');
+            setName(filtered);
+            handleNameValidation(filtered);
           }}
           onBlur={() => {
             handleNameValidation(name);
@@ -519,6 +525,8 @@ function RegisterPage() {
           {TERMS_CONTENT[activeTermsId]}
         </AgreementModal>
       )}
+
+      {isRegistering && <LoadingOverlay />}
     </div>
   );
 }

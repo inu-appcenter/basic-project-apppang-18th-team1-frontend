@@ -9,6 +9,13 @@ const formatDateTime = (iso: string) => {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
+const formatPhoneNumber = (value: string) => {
+  const numbers = value.replace(/\D/g, '');
+  if (numbers.length <= 3) return numbers;
+  if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+  return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+};
+
 function OrderListPage() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderListItem[]>([]);
@@ -122,6 +129,19 @@ function OrderListPage() {
                 </div>
               </button>
             ))}
+
+            <div className="mt-2 border-t border-gray-200 pt-3">
+              <p className="text-xs font-bold text-[#212B36]">배송지</p>
+              <p className="mt-1 text-xs text-gray-500">
+                {order.shippingRecipientName} · {formatPhoneNumber(order.shippingRecipientPhone)}
+              </p>
+              <p className="text-xs text-gray-500">
+                {order.shippingMainAddress} {order.shippingDetailAddress}
+              </p>
+              {order.shippingDeliveryMessage && (
+                <p className="text-xs text-gray-400">{order.shippingDeliveryMessage}</p>
+              )}
+            </div>
 
             <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-3">
               <span className="text-primary-200 text-sm font-bold">{order.orderStatus}</span>

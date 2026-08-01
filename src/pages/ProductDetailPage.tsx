@@ -193,6 +193,41 @@ function ProductDetailPage() {
     }
   };
 
+  const handleBuyNowClick = () => {
+    if (!productId || !product) return;
+
+    if (!localStorage.getItem('accessToken')) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedVariantId || !selectedVariant) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
+
+    navigate('/checkout', {
+      state: {
+        mode: 'buyNow',
+        productId: Number(productId),
+        optionId: selectedVariantId,
+        quantity,
+        items: [
+          {
+            key: product.productId,
+            productName: product.productName,
+            thumbnailUrl: images[0] ?? '',
+            brandName: product.brand.brandName,
+            optionText: selectedVariant.variantName,
+            quantity,
+            salePrice: product.salePrice + selectedVariant.price,
+          },
+        ],
+      },
+    });
+  };
+
   const handleToggleReviewForm = () => {
     if (!localStorage.getItem('accessToken')) {
       alert('로그인이 필요한 기능입니다.');
@@ -778,7 +813,11 @@ function ProductDetailPage() {
           >
             장바구니 담기
           </button>
-          <button className="bg-primary-200 flex-1 rounded py-3 font-bold text-white">
+          <button
+            type="button"
+            onClick={handleBuyNowClick}
+            className="bg-primary-200 flex-1 rounded py-3 font-bold text-white"
+          >
             바로구매
           </button>
         </div>

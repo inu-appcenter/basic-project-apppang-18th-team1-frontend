@@ -24,8 +24,19 @@ export interface CreateOrderResponse {
   data: OrderData;
 }
 
-export const createOrder = (signal?: AbortSignal) => {
-  return instance.post<CreateOrderResponse>('/orders', undefined, { signal });
+export const createOrder = (addressId: number, signal?: AbortSignal) => {
+  return instance.post<CreateOrderResponse>('/orders', { addressId }, { signal });
+};
+
+export interface BuyNowRequest {
+  productId: number;
+  optionId: number;
+  quantity: number;
+  addressId: number;
+}
+
+export const buyNow = (data: BuyNowRequest, signal?: AbortSignal) => {
+  return instance.post<CreateOrderResponse>('/orders/buy-now', data, { signal });
 };
 
 export interface OrderListItem {
@@ -33,6 +44,11 @@ export interface OrderListItem {
   orderStatus: string;
   finalPaymentPrice: number;
   createdAt: string;
+  shippingRecipientName: string;
+  shippingRecipientPhone: string;
+  shippingMainAddress: string;
+  shippingDetailAddress: string;
+  shippingDeliveryMessage: string;
   items: OrderItem[];
 }
 

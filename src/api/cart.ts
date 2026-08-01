@@ -98,8 +98,6 @@ export interface ToggleCartItemSelectionResponse {
   isSelected: boolean;
 }
 
-// 명세서 요청 필드는 `selected`, 응답 필드는 `messge`/`cartItemmId`/`selected`로 되어있지만
-// 실제로는 요청 body가 `{ isSelected: boolean }`, 응답이 `{ message, cartItemId, isSelected }`.
 export const toggleCartItemSelection = (
   cartItemId: number,
   isSelected: boolean,

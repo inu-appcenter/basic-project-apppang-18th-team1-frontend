@@ -46,11 +46,8 @@ function ProductListPage() {
       ? (CATEGORY_LABELS[categoryParam] ?? categoryParam)
       : searchKeyword;
   const displayedPageTitle = pageTitle.length > 20 ? `${pageTitle.slice(0, 20)}...` : pageTitle;
-  // category가 있으면 카테고리 조회, 없고 검색어만 있으면 검색 API 사용
   const isSearchMode = !isWishlistMode && !categoryParam && searchKeyword.length > 0;
 
-  // 카테고리/검색어/정렬이 바뀌면 이전 page(예: 더보기로 늘어난 값)를 그대로 요청하지 않도록
-  // 같은 effect 안에서 필터 변경 여부를 확인해 요청 page를 0으로 맞춘다.
   const filterKey = `${isWishlistMode}::${categoryParam ?? ''}::${searchKeyword}::${selectedSort}`;
   const prevFilterKeyRef = useRef(filterKey);
   const hasAlertedRef = useRef(false);
@@ -62,7 +59,7 @@ function ProductListPage() {
     if (filterChanged && page !== 0) {
       setPage(0);
       setProducts([]);
-      return undefined; // page가 0으로 바뀌면 이 effect가 다시 실행되면서 실제 요청을 보냄
+      return undefined;
     }
 
     if (isWishlistMode && !localStorage.getItem('accessToken')) {
@@ -90,7 +87,7 @@ function ProductListPage() {
             {
               keyword: searchKeyword,
               sort: SEARCH_SORT_MAP[selectedSort],
-              page: page + 1, // 검색 API는 실제로 1부터 시작 (page=0은 400)
+              page: page + 1,
               size: 20,
             },
             controller.signal,
@@ -114,13 +111,10 @@ function ProductListPage() {
             {
               category: categoryParam,
               sort: SORT_MAP[selectedSort],
-              // TODO: 명세상 page는 0-indexed(기본값 0)인데, 실제 배포된 API는 page=0을 보내면
-              // 400("page는 0 이상이어야 합니다")을 반환하고 page=1을 보내야 첫 페이지가 옴.
-              // 백엔드가 내부적으로 1을 빼는 것으로 추정되어 +1 보정. 백엔드 수정되면 제거 필요.
               page: page + 1,
               size: 20,
             },
-            controller.signal, // instance.get 두번째 인자로 signal 전달
+            controller.signal,
           );
 
           const { products: newProducts, totalPages: newTotalPages } = response.data;
@@ -129,7 +123,7 @@ function ProductListPage() {
           setIsLastPage(newTotalPages === 0 || page + 1 >= newTotalPages);
         }
       } catch (err) {
-        if (controller.signal.aborted) return; // 취소된 요청은 무시
+        if (controller.signal.aborted) return;
         console.error('에러 발생', err);
         setError('상품을 불러오지 못했습니다.');
       } finally {
@@ -139,7 +133,7 @@ function ProductListPage() {
 
     fetchProducts();
 
-    return () => controller.abort(); // 클린업 시 이전 요청 취소
+    return () => controller.abort();
   }, [filterKey, page, categoryParam, selectedSort, searchKeyword, isSearchMode, isWishlistMode]);
 
   return (

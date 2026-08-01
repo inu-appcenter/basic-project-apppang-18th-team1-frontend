@@ -135,7 +135,7 @@ function MainPage() {
               <button
                 key={banner.rank}
                 type="button"
-                className="bg-secondary-100 flex h-full min-w-full items-center gap-4 px-5"
+                className="from-secondary-100 to-secondary-200/40 flex h-full min-w-full items-center gap-4 bg-gradient-to-br px-5"
                 onClick={() => navigate(`/products/${banner.product.id}`)}
                 aria-label={`${banner.rank}위 ${banner.product.name}`}
               >
@@ -169,7 +169,7 @@ function MainPage() {
               </button>
             ))
           ) : (
-            <div className="bg-secondary-100 h-full min-w-full" />
+            <div className="from-secondary-100 to-secondary-200/40 h-full min-w-full bg-gradient-to-br" />
           )}
         </div>
         <div className="pointer-events-none z-10 col-start-1 row-start-1 flex items-end justify-center gap-2 pb-4">

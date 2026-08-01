@@ -17,6 +17,7 @@ import AccountRecoveryPage from '@/pages/AccountRecoveryPage';
 import OrderPage from '@/pages/OrderPage';
 import OrderListPage from '@/pages/OrderListPage';
 import ProfilePage from '@/pages/ProfilePage';
+import AddressesPage from '@/pages/AddressesPage';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/wishlist" element={<ProductListPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/addresses" element={<AddressesPage />} />
         </Route>
 
         <Route element={<CommonLayoutNoNavigationBar />}>

@@ -31,6 +31,7 @@ export interface ReviewListItem {
   rating: number;
   content: string;
   helpfulCount: number;
+  isHelpful: boolean;
   thumbnailUrl: string | null;
 }
 
@@ -72,6 +73,24 @@ export const updateReview = (
   return instance.patch<UpdateReviewResponse>(`/products/${productId}/reviews/${reviewId}`, body, {
     signal,
   });
+};
+
+export interface ToggleReviewHelpfulResponse {
+  message: string;
+  isHelpful: boolean;
+  helpfulCount: number;
+}
+
+export const toggleReviewHelpful = (
+  productId: string | number,
+  reviewId: number,
+  signal?: AbortSignal,
+) => {
+  return instance.post<ToggleReviewHelpfulResponse>(
+    `/products/${productId}/reviews/${reviewId}/helpful`,
+    null,
+    { signal },
+  );
 };
 
 export interface ReviewOwnershipResponse {

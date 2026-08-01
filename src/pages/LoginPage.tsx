@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RightArrow, Cross, RoundFrameCross, EyeOpen, EyeClose } from '@/components/icons';
 import { login } from '@/api/auth';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const isActive = email.length > 0 && password.length > 0;
 
@@ -28,6 +30,7 @@ function LoginPage() {
   }
 
   const handleLogin = async () => {
+    setIsLoggingIn(true);
     try {
       const response = await login({
         email,
@@ -46,6 +49,8 @@ function LoginPage() {
       }
 
       setLoginError(error.response.data.message);
+    } finally {
+      setIsLoggingIn(false);
     }
   };
   return (
@@ -154,6 +159,8 @@ function LoginPage() {
         </div>
       )}
       {passwordError && <p className="w-full text-xs text-red-500">{passwordError}</p>}
+
+      {isLoggingIn && <LoadingOverlay />}
     </div>
   );
 }

@@ -19,14 +19,6 @@ function NavigationBar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleNavClick = (path: string) => {
-    if (path === '/mypage' && !localStorage.getItem('accessToken')) {
-      navigate('/login');
-      return;
-    }
-    navigate(path);
-  };
-
   return (
     <nav className="flex h-16 shrink-0 border-t border-gray-100 bg-white">
       {NAV_ITEMS.map(({ label, path, icon }) => {
@@ -35,7 +27,7 @@ function NavigationBar() {
           <button
             key={path}
             type="button"
-            onClick={() => handleNavClick(path)}
+            onClick={() => navigate(path)}
             className={`hover:bg-primary-100 hover:text-primary-200 flex flex-1 flex-col items-center justify-center gap-1 transition-colors ${
               isActive ? 'text-primary-200' : 'text-gray-300'
             }`}

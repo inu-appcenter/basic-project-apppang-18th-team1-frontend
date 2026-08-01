@@ -39,16 +39,6 @@ export const buyNow = (data: BuyNowRequest, signal?: AbortSignal) => {
   return instance.post<CreateOrderResponse>('/orders/buy-now', data, { signal });
 };
 
-export interface BuyNowRequest {
-  productId: number;
-  optionId: number;
-  quantity: number;
-}
-
-export const buyNow = (data: BuyNowRequest, signal?: AbortSignal) => {
-  return instance.post<CreateOrderResponse>('/orders/buy-now', data, { signal });
-};
-
 export interface OrderListItem {
   orderId: number;
   orderStatus: string;

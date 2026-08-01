@@ -1,20 +1,22 @@
 import type { ReactNode } from 'react';
-import {
-  Camera,
-  ChefHat,
-  Dumbbell,
-  Gift,
-  Monitor,
-  Search,
-  Smartphone,
-  Sparkles,
-  Tag,
-  Utensils,
-} from 'lucide-react';
+
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CATEGORY_LABELS } from '@/constants/category';
 import { getMainBanners, type MainBanner } from '@/api/banner';
+import {
+  Laptop,
+  Phone,
+  Tablet,
+  Watch,
+  Headphone,
+  Monitor,
+  Mouse,
+  Keyboard,
+  Search,
+  Gamepad,
+  Battery,
+} from '@/components/icons';
 
 // ---- Types ----
 
@@ -30,14 +32,16 @@ type Category = {
 const MAIN_BANNER_LIMIT = 3;
 
 const CATEGORY_ICONS: Record<string, ReactNode> = {
-  '1': <Tag size={40} />,
-  '2': <Monitor size={40} />,
-  '3': <Smartphone size={40} />,
-  '4': <Utensils size={40} />,
-  '5': <Dumbbell size={40} />,
-  '6': <Gift size={40} />,
-  '7': <Sparkles size={40} />,
-  '8': <ChefHat size={40} />,
+  '1': <Laptop size={40} color="#212B36" />,
+  '2': <Phone size={40} color="#212B36" />,
+  '3': <Tablet size={40} color="#212B36" />,
+  '4': <Watch size={40} color="#212B36" />,
+  '5': <Headphone size={40} color="#212B36" />,
+  '6': <Monitor size={40} color="#212B36" />,
+  '7': <Mouse size={40} color="#212B36" />,
+  '8': <Keyboard size={40} color="#212B36" />,
+  '9': <Gamepad size={40} color="#212B36" />,
+  '10': <Battery size={40} color="#212B36" />,
 };
 
 const CATEGORIES: Category[] = Object.entries(CATEGORY_LABELS).map(([category, label], index) => ({
@@ -109,7 +113,7 @@ function MainPage() {
           className="flex w-full items-center gap-3 rounded-full border-2 border-black bg-white px-4 py-3"
           onClick={() => navigate('/search')}
         >
-          <Search size={20} className="shrink-0 text-black" />
+          <Search size={20} color="#212B36" />
           <span className="text-body-3 flex-1 text-left text-gray-300">앱팡에서 검색하세요!</span>
         </button>
       </div>
